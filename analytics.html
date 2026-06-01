@@ -10,32 +10,43 @@
 <style>
 body {
   margin: 0;
+  padding: 0;
   background: #0b0f17;
   font-family: 'Inter', sans-serif;
   color: #cbd5f5;
 }
 
 .container {
-  padding: 20px;
+  width: 100%;
+  height: calc(100vh - 70px);
+  display: flex;
+  flex-direction: column;
 }
 
-h2 {
-  margin-bottom: 10px;
-  color: #e2e8f0;
+/* FULL WIDTH CONTENT */
+.content {
+  flex: 1;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-/* CARD */
+/* CARD FULL WIDTH */
 .card {
   background: #111827;
-  padding: 15px;
-  margin-bottom: 20px;
-  border-radius: 8px;
+  border: 1px solid #1f2937;
+  border-radius: 6px;
+  padding: 12px;
+  width: 100%;
 }
 
-/* CHART */
+/* CHART FULL */
 canvas {
-  height: 300px !important;
+  width: 100% !important;
+  height: 320px !important;
 }
+
 
 /* LEGEND STYLE */
 .chart-title {
@@ -52,21 +63,20 @@ canvas {
 
 <div class="container">
 
-  <!-- BATTERY -->
-  <div class="card">
-    <div class="chart-title">
-      <div>🔋 Battery Voltage</div>
+ <div class="content">
+
+    <div class="card">
+      <h3>🔋 BATTERY VOLTAGE</h3>
+      <canvas id="batteryChart"></canvas>
     </div>
-    <canvas id="batteryChart"></canvas>
+
+    <div class="card">
+      <h3>🌡 TEMPERATURE</h3>
+      <canvas id="tempChart"></canvas>
+    </div>
+
   </div>
 
-  <!-- TEMPERATURE -->
-  <div class="card">
-    <div class="chart-title">
-      <div>🌡 CPU Temperature</div>
-    </div>
-    <canvas id="tempChart"></canvas>
-  </div>
 
 </div>
 
@@ -75,104 +85,117 @@ canvas {
 // SATELLITES
 // =======================
 const sats = [
-  { name: "VINSAT-1", color: "#22c55e" },
-  { name: "VINSAT-2", color: "#eab308" },
+  { name: "VINSAT-1", color: "#4ade80" },
+  { name: "VINSAT-2", color: "#facc15" },
   { name: "VINSAT-3", color: "#60a5fa" },
   { name: "VINSAT-4", color: "#f97316" }
 ];
 
-// =======================
-// CREATE EMPTY DATASETS
-// =======================
 function createDatasets() {
   return sats.map(s => ({
     label: s.name,
     borderColor: s.color,
     data: [],
-    tension: 0.3,
-    pointRadius: 0
+    borderWidth: 1.2,
+    pointRadius: 0,
+    tension: 0   // QUAN TRỌNG: không smooth
   }));
 }
 
-// =======================
-// CHART INIT
-// =======================
-const ctx1 = document.getElementById("batteryChart").getContext("2d");
-const ctx2 = document.getElementById("tempChart").getContext("2d");
-
-const batteryChart = new Chart(ctx1, {
-  type: "line",
-  data: {
-    labels: [],
-    datasets: createDatasets()
-  },
-  options: {
-    responsive: true,
-    animation: false,
-    scales: {
-      y: {
-        min: 0,
-        max: 5,
-        ticks: { color: "#94a3b8" }
-      },
-      x: { ticks: { display: false } }
+// INIT
+const batteryChart = new Chart(
+  document.getElementById("batteryChart"),
+  {
+    type: "line",
+    data: {
+      labels: [],
+      datasets: createDatasets()
     },
-    plugins: {
-      legend: { labels: { color: "#cbd5f5" } }
+    options: {
+      animation: false,
+      responsive: true,
+      plugins: {
+        legend: { labels: { color: "#cbd5f5" } }
+      },
+      scales: {
+        y: {
+          min: 0,
+          max: 5,
+          ticks: {
+            color: "#94a3b8",
+            callback: v => v + " V"
+          }
+        },
+        x: { ticks: { display: false } }
+      }
     }
   }
-});
+);
 
-const tempChart = new Chart(ctx2, {
-  type: "line",
-  data: {
-    labels: [],
-    datasets: createDatasets()
-  },
-  options: {
-    responsive: true,
-    animation: false,
-    scales: {
-      y: {
-        min: 20,
-        max: 90,
-        ticks: { color: "#94a3b8" }
-      },
-      x: { ticks: { display: false } }
+const tempChart = new Chart(
+  document.getElementById("tempChart"),
+  {
+    type: "line",
+    data: {
+      labels: [],
+      datasets: createDatasets()
     },
-    plugins: {
-      legend: { labels: { color: "#cbd5f5" } }
+    options: {
+      animation: false,
+      responsive: true,
+      plugins: {
+        legend: { labels: { color: "#cbd5f5" } }
+      },
+      scales: {
+        y: {
+          min: 20,
+          max: 90,
+          ticks: {
+            color: "#94a3b8",
+            callback: v => v + "°C"
+          }
+        },
+        x: { ticks: { display: false } }
+      }
     }
   }
-});
+);
 
 // =======================
-// REALTIME UPDATE
+// DATA “GIỐNG THẬT”
 // =======================
+function noisy(min, max) {
+  let val = Math.random() * (max - min) + min;
+
+  // thỉnh thoảng spike mạnh
+  if (Math.random() < 0.1) {
+    val = Math.random() * (max - min);
+  }
+
+  return val.toFixed(2);
+}
+
 function updateChart(chart, min, max) {
 
-  const time = new Date().toLocaleTimeString();
-
-  chart.data.labels.push(time);
+  chart.data.labels.push("");
 
   chart.data.datasets.forEach(ds => {
-    ds.data.push((Math.random() * (max - min) + min).toFixed(2));
+    ds.data.push(noisy(min, max));
   });
 
-  // giới hạn 40 điểm
-  if (chart.data.labels.length > 40) {
+  if (chart.data.labels.length > 80) {
     chart.data.labels.shift();
     chart.data.datasets.forEach(ds => ds.data.shift());
   }
 
-  chart.update();
+  chart.update("none");
 }
 
-// loop
+// LOOP
 setInterval(() => {
-  updateChart(batteryChart, 2.5, 5);   // voltage
-  updateChart(tempChart, 30, 80);      // temp
-}, 1000);
+  updateChart(batteryChart, 2.5, 5);
+  updateChart(tempChart, 30, 80);
+}, 400);
 
 </script>
 
