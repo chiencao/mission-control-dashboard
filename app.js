@@ -8,17 +8,19 @@ const initWhenReady = setInterval(function() {
 
 function runDashboard() {
   // ======================
-  // INIT MAP (Hệ tọa độ phẳng vô hạn cho ảnh cục bộ)
+  // INIT MAP (Bung hết cỡ bản đồ và vô hiệu hóa khoảng trống thừa)
   // ======================
   const map = L.map('map', {
     zoomControl: true,
     attributionControl: false,
     crs: L.CRS.Simple,
     minZoom: -2,
-    maxZoom: 2
+    maxZoom: 3,
+    bounceAtZoomLimits: false, // Ngăn việc kéo bản đồ ra ngoài ranh giới ảnh
+    maxBoundsViscosity: 1.0     // Khóa chặt góc nhìn, không cho kéo lệch khỏi ảnh nền
   });
 
-  // Khởi tạo ma trận ranh giới bản đồ (2000 x 1000) không dùng cú pháp ngoặc vuông lồng nhau
+  // Thiết lập ma trận ranh giới bản đồ (2000 x 1000)
   var pointBottomLeft = new Array();
   pointBottomLeft.push(0);
   pointBottomLeft.push(0);
@@ -31,18 +33,21 @@ function runDashboard() {
   nativeBounds.push(pointBottomLeft);
   nativeBounds.push(pointTopRight);
 
+  // Ép bản đồ giới hạn nghiêm ngặt trong khung ảnh này để tránh viền xám đen bên ngoài
+  map.setMaxBounds(nativeBounds);
+
   // ======================
   // SỬ DỤNG HÌNH ẢNH MAP.WEBP TỪ REPO CỦA BẠN
   // ======================
   L.imageOverlay('map.webp', nativeBounds).addTo(map);
-  map.fitBounds(nativeBounds);
+  map.fitBounds(nativeBounds); // Tự động kéo giãn ảnh vừa khít màn hình hiển thị
 
   // ======================
   // TRẠM MẶT ĐẤT ĐÀ NẴNG
   // ======================
   var stationPoint = new Array();
-  stationPoint.push(540);
-  stationPoint.push(1600);
+  stationPoint.push(540); // Tọa độ trục Y (Vĩ độ phẳng)
+  stationPoint.push(1600); // Tọa độ trục X (Kinh độ phẳng)
   
   const groundStationIcon = L.divIcon({
     className: 'gs-icon',
@@ -54,12 +59,12 @@ function runDashboard() {
   L.marker(stationPoint, { icon: groundStationIcon }).addTo(map);
 
   // ======================
-  // SATELLITE DATA
+  // SATELLITE DATA (Cấu hình độ cao bay cố định)
   // ======================
   const satellites = [
-    { name: "VINSAT-NANO-1", color: "#10b981", speed: 4 },  
-    { name: "VINSAT-NANO-2", color: "#ef4444", speed: 6 }, 
-    { name: "VINSAT-NANO-3", color: "#06b6d4", speed: 3 }  
+    { name: "VINSAT-NANO-1", color: "#10b981", speed: 4, heightY: 600 },  // Bay thẳng ở trục Y = 600
+    { name: "VINSAT-NANO-2", color: "#ef4444", speed: 6, heightY: 540 },  // Bay thẳng đi qua Trạm Đà Nẵng (Y = 540)
+    { name: "VINSAT-NANO-3", color: "#06b6d4", speed: 3, heightY: 450 }   // Bay thẳng ở trục Y = 450
   ];
 
   // ======================
@@ -73,9 +78,9 @@ function runDashboard() {
       iconAnchor: L.point(5, 5)
     });
 
-    const initialX = i * 600 + 200; 
+    const initialX = i * 600 + 100; 
     var initialPoint = new Array();
-    initialPoint.push(540);
+    initialPoint.push(sat.heightY);
     initialPoint.push(initialX);
 
     return {
@@ -83,19 +88,20 @@ function runDashboard() {
       color: sat.color,
       speed: sat.speed,
       x: initialX,
-      y: 540, 
+      y: sat.heightY, 
       marker: L.marker(initialPoint, { icon: icon }).addTo(map)
     };
   });
 
   // ======================
-  // THUẬT TOÁN QUỸ ĐẠO CHẠY QUANH BẢN ĐỒ PHẲNG
+  // THUẬT TOÁN QUỸ ĐẠO BAY THẲNG TẮP KHÔNG ZIGZAC
   // ======================
   setInterval(function() {
     satObjects.forEach(function(sat) {
-      sat.x += sat.speed;
-      sat.y = 540 + (200 * Math.sin(sat.x * Math.PI / 400));
+      sat.x += sat.speed; // Chỉ thay đổi trục X để dịch chuyển sang phải
+      // Giữ nguyên trục Y (sat.y) để vệ tinh bay thành đường thẳng tuyệt đối
 
+      // Reset vòng lặp tuần hoàn khi bay hết mép bên phải của bản đồ
       if (sat.x > 2000) {
         sat.x = 0;
       }
