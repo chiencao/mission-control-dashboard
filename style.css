@@ -1,0 +1,94 @@
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: #020b1a;
+  color: #ccefff;
+}
+
+/* HEADER */
+.header {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px;
+  border-bottom: 1px solid cyan;
+}
+
+.logo {
+  font-size: 20px;
+  color: cyan;
+}
+
+.status {
+  background: rgba(0,255,150,0.1);
+  padding: 5px 15px;
+  border-radius: 8px;
+  color: #00ffa6;
+}
+
+/* LAYOUT */
+.container {
+  display: flex;
+  height: calc(100vh - 70px);
+}
+
+.left-panel {
+  width: 280px;
+}
+
+.main-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+/* CARD */
+.card {
+  margin: 10px;
+  padding: 15px;
+  border: 1px solid cyan;
+  border-radius: 10px;
+}
+
+/* CIRCLE */
+.circle {
+  font-size: 40px;
+  color: orange;
+}
+
+/* COLORS */
+.green {
+  color: #00ffa6;
+}
+
+.warning {
+  color: orange;
+}
+
+.speed {
+  font-size: 20px;
+  margin-top: 10px;
+}
+
+/* MAP */
+#map {
+  flex: 1;
+}
+
+/* LOG */
+.log {
+  height: 120px;
+  overflow-y: auto;
+  border-top: 1px solid cyan;
+  background: rgba(0,20,40,0.9);
+  padding: 10px;
+  font-size: 13px;
+}
+
+/* SATELLITE EFFECT */
+.satellite-icon {
+  width: 10px;
+  height: 10px;
+  background: red;
+  border-radius: 50%;
+  box-shadow: 0 0 10px red, 0 0 20px red;
+}
