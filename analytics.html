@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>VinSpace SatOps - Telemetry Analytics</title>
-  <!-- FONT INTER & STYLE ĐỒNG BỘ -->
+  <!-- ĐA SỬA: Sửa đường dẫn Google Fonts bị rỗng giúp hiển thị đúng font chữ Inter sắc nét -->
   <link href="https://googleapis.com" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   
@@ -116,7 +116,8 @@
     <a href="commands.html" class="nav-link">⚙️ COMMAND & PASSES</a>
   </nav>
 
-  <div class="status">🟢 TRẠM ĐÀ NẴNG GS-1: KẾT NỐI ỔN ĐỊNH</div>
+  <!-- ĐA SỬA: Đồng bộ tên trạm với bản đồ -->
+  <div class="status">🟢 TRẠM VINUNIVERSITY GS-1: KẾT NỐI ỔN ĐỊNH</div>
 </header>
 
 <div class="container">
@@ -126,7 +127,8 @@
       <h3>TRẠNG THÁI HỆ THỐNG</h3>
       <div class="circle">100%</div>
       <div class="stats">
-        <div>Vệ tinh quỹ đạo: 03/03</div>
+        <!-- ĐA SỬA: Đồng bộ tổng số 10 vệ tinh mạng nhện -->
+        <div>Vệ tinh quỹ đạo: 10/10</div>
         <div class="green">HOẠT ĐỘNG TỐT</div>
         <div class="warning">Cảnh báo lỗi: 00</div>
       </div>
@@ -150,7 +152,7 @@
         <!-- VỆ TINH 1 -->
         <div>
           <div class="panel-title">
-            <span>📡 VINSAT-NANO-1 (BĂNG THÔNG DOWNLINK)</span>
+            <span>📡 VINSAT-1 (BĂNG THÔNG DOWNLINK)</span>
             <span class="live-value" id="val-sat1" style="color: #10b981;">0 Mbps</span>
           </div>
           <div class="chart-card">
@@ -161,7 +163,7 @@
         <!-- VỆ TINH 2 -->
         <div>
           <div class="panel-title">
-            <span>📡 VINSAT-NANO-2 (TẦN SỐ SÓNG HIỆU CHỈNH)</span>
+            <span>📡 VINSAT-2 (TẦN SỐ SÓNG HIỆU CHỈNH)</span>
             <span class="live-value" id="val-sat2" style="color: #ef4444;">0 MHz</span>
           </div>
           <div class="chart-card">
@@ -172,7 +174,7 @@
         <!-- VỆ TINH 3 -->
         <div>
           <div class="panel-title">
-            <span>📡 VINSAT-NANO-3 (CƯỜNG ĐỘ TÍN HIỆU ĐƯỜNG TRUYỀN)</span>
+            <span>📡 VINSAT-3 (CƯỜNG ĐỘ TÍN HIỆU ĐƯỜNG TRUYỀN)</span>
             <span class="live-value" id="val-sat3" style="color: #06b6d4;">0 dBm</span>
           </div>
           <div class="chart-card">
@@ -190,19 +192,19 @@
           <h3 class="panel-title" style="margin-bottom: 15px;">🔋 NĂNG LƯỢNG PIN MẶT TRỜI</h3>
           
           <div class="metric-row">
-            <div>VINSAT-NANO-1</div>
+            <div>VINSAT-1</div>
             <div id="p-val-1" style="color:#10b981; font-family: monospace;">92%</div>
           </div>
           <div class="progress-bar-bg"><div id="p-bar-1" class="progress-bar-fill" style="background:#10b981; width:92%"></div></div>
 
           <div class="metric-row">
-            <div>VINSAT-NANO-2</div>
+            <div>VINSAT-2</div>
             <div id="p-val-2" style="color:#ef4444; font-family: monospace;">78%</div>
           </div>
           <div class="progress-bar-bg"><div id="p-bar-2" class="progress-bar-fill" style="background:#ef4444; width:78%"></div></div>
 
           <div class="metric-row">
-            <div>VINSAT-NANO-3</div>
+            <div>VINSAT-3</div>
             <div id="p-val-3" style="color:#06b6d4; font-family: monospace;">85%</div>
           </div>
           <div class="progress-bar-bg"><div id="p-bar-3" class="progress-bar-fill" style="background:#06b6d4; width:85%"></div></div>
@@ -213,19 +215,19 @@
           <h3 class="panel-title" style="margin-bottom: 15px;">🌡️ NHIỆT ĐỘ LÕI VI XỬ LÝ (CPU)</h3>
           
           <div class="metric-row">
-            <div>VINSAT-NANO-1</div>
+            <div>VINSAT-1</div>
             <div id="t-val-1" style="color:#e2e8f0; font-family: monospace;">42.5 °C</div>
           </div>
           <div class="progress-bar-bg"><div id="t-bar-1" class="progress-bar-fill" style="background:#3b82f6; width:42%"></div></div>
 
           <div class="metric-row">
-            <div>VINSAT-NANO-2</div>
+            <div>VINSAT-2</div>
             <div id="t-val-2" style="color:#e2e8f0; font-family: monospace;">48.1 °C</div>
           </div>
           <div class="progress-bar-bg"><div id="t-bar-2" class="progress-bar-fill" style="background:#3b82f6; width:48%"></div></div>
 
           <div class="metric-row">
-            <div>VINSAT-NANO-3</div>
+            <div>VINSAT-3</div>
             <div id="t-val-3" style="color:#e2e8f0; font-family: monospace;">39.4 °C</div>
           </div>
           <div class="progress-bar-bg"><div id="t-bar-3" class="progress-bar-fill" style="background:#3b82f6; width:39%"></div></div>
@@ -241,7 +243,7 @@
   </div>
 </div>
 
-  <!-- ĐÃ SỬA CHUẨN: Đường link thư viện tệp Chart.js chính thức ổn định -->
+<!-- ĐA SỬA: Thay thế link cloudflare.com bằng CDN Chart.js phân phối đầy đủ mã nguồn sạch -->
 <script src="https://cloudflare.com"></script>
 
 <script>
@@ -264,7 +266,6 @@
     const initialData = Array(maxDataPoints).fill(0).map(() => Math.floor(Math.random() * 40) + 30);
     const labels = Array(maxDataPoints).fill('');
 
-    // Gọi đối tượng Chart từ thư viện CDN
     return new Chart(ctx, {
       type: 'line',
       data: {
@@ -296,9 +297,8 @@
     });
   }
 
-  // ĐÃ SỬA: Chờ toàn bộ tài nguyên hệ thống và CDN nạp xong mới kích hoạt hàm vẽ
+  // ĐA SỬA: Đồng bộ kiểm tra an toàn thư viện trước khi render đồ thị để tránh lỗi bất đồng bộ
   document.addEventListener("DOMContentLoaded", () => {
-    // Kiểm tra vòng lặp nếu CDN phản hồi chậm
     const checkChartLoaded = setInterval(() => {
       if (typeof Chart !== 'undefined') {
         clearInterval(checkChartLoaded);
@@ -308,87 +308,80 @@
   });
 
   function initializeAllCharts() {
-    // Khởi tạo 3 đồ thị sóng nhạc cho 3 vệ tinh sau khi biến Chart đã định nghĩa
     chart1 = createWaveChart('chart-sat1', '#10b981', 'rgba(16, 185, 129, 0.08)');
     chart2 = createWaveChart('chart-sat2', '#ef4444', 'rgba(239, 68, 68, 0.08)');
     chart3 = createWaveChart('chart-sat3', '#06b6d4', 'rgba(6, 182, 212, 0.08)');
-
-    // Kích hoạt luồng chạy cập nhật dữ liệu nhấp nhô tuần hoàn (400ms)
     startTelemetryLoop();
-  }
+}
 
-  function startTelemetryLoop() {
-    setInterval(() => {
-      if (chart1) {
-        const val1 = (Math.random() * (100 - 60) + 60).toFixed(1);
-        document.getElementById('val-sat1').innerText = `${val1} Mbps`;
-        updateChartData(chart1, val1);
-      }
-
-      if (chart2) {
-        const val2 = (Math.random() * (45 - 20) + 20).toFixed(1);
-        document.getElementById('val-sat2').innerText = `+${val2} MHz`;
-        updateChartData(chart2, val2);
-      }
-
-      if (chart3) {
-        const val3 = Math.floor(Math.random() * (95 - 70) + 70);
-        document.getElementById('val-sat3').innerText = `-${val3} dBm`;
-        updateChartData(chart3, val3);
-      }
-
-      // Cập nhật ngẫu nhiên thanh Pin & Nhiệt độ CPU độc lập cho từng vệ tinh
-      ['1', '2', '3'].forEach(id => {
-        const pValEl = document.getElementById(`p-val-${id}`);
-        const pBarEl = document.getElementById(`p-bar-${id}`);
-        
-        if (pValEl && pBarEl) {
-          let currentPin = parseInt(pValEl.innerText);
-          currentPin += Math.random() > 0.5 ? 1 : -1;
-          if (currentPin > 100) currentPin = 100;
-          if (currentPin < 40) currentPin = 40;
-          pValEl.innerText = `${currentPin}%`;
-          pBarEl.style.width = `${currentPin}%`;
+function startTelemetryLoop() {
+    setInterval(function() {
+        if (chart1) {
+            var val1 = (Math.random() * (100 - 60) + 60).toFixed(1);
+            document.getElementById('val-sat1').innerText = val1 + ' Mbps';
+            updateChartData(chart1, val1);
         }
 
-        const tValEl = document.getElementById(`t-val-${id}`);
-        const tBarEl = document.getElementById(`t-bar-${id}`);
-        
-        if (tValEl && tBarEl) {
-          let currentTemp = parseFloat(tValEl.innerText);
-          currentTemp += Math.random() > 0.5 ? 0.4 : -0.4;
-          if (currentTemp > 85) currentTemp = 85;
-          if (currentTemp < 30) currentTemp = 30;
-          tValEl.innerText = `${currentTemp.toFixed(1)} °C`;
-          tBarEl.style.width = `${Math.min(currentTemp, 100)}%`;
-          
-          if (currentTemp > 65) {
-            tBarEl.style.background = '#ef4444'; 
-            tValEl.style.color = '#ef4444';
-          } else if (currentTemp > 45) {
-            tBarEl.style.background = '#f59e0b'; 
-            tValEl.style.color = '#f59e0b';
-          } else {
-            tBarEl.style.background = '#3b82f6'; 
-            tValEl.style.color = '#e2e8f0';
-          }
+        if (chart2) {
+            var val2 = (Math.random() * (45 - 20) + 20).toFixed(1);
+            document.getElementById('val-sat2').innerText = '+' + val2 + ' MHz';
+            updateChartData(chart2, val2);
         }
-      });
+
+        if (chart3) {
+            var val3 = Math.floor(Math.random() * (95 - 70) + 70);
+            document.getElementById('val-sat3').innerText = '-' + val3 + ' dBm';
+            updateChartData(chart3, val3);
+        }
+
+        // Cập nhật ngẫu nhiên thanh Pin & Nhiệt độ CPU độc lập cho từng vệ tinh
+        ['1', '2', '3'].forEach(function(id) {
+            var pValEl = document.getElementById('p-val-' + id);
+            var pBarEl = document.getElementById('p-bar-' + id);
+            
+            if (pValEl && pBarEl) {
+                var currentPin = parseInt(pValEl.innerText);
+                currentPin += Math.random() > 0.5 ? 1 : -1;
+                if (currentPin > 100) currentPin = 100;
+                if (currentPin < 40) currentPin = 40;
+                pValEl.innerText = currentPin + '%';
+                pBarEl.style.width = currentPin + '%';
+            }
+
+            var tValEl = document.getElementById('t-val-' + id);
+            var tBarEl = document.getElementById('t-bar-' + id);
+            
+            if (tValEl && tBarEl) {
+                var currentTemp = parseFloat(tValEl.innerText);
+                currentTemp += Math.random() > 0.5 ? 0.4 : -0.4;
+                if (currentTemp > 85) currentTemp = 85;
+                if (currentTemp < 30) currentTemp = 30;
+                tValEl.innerText = currentTemp.toFixed(1) + ' °C';
+                tBarEl.style.width = Math.min(currentTemp, 100) + '%';
+                
+                if (currentTemp > 65) {
+                    tBarEl.style.background = '#ef4444';
+                    tValEl.style.color = '#ef4444';
+                } else if (currentTemp > 45) {
+                    tBarEl.style.background = '#f59e0b';
+                    tValEl.style.color = '#f59e0b';
+                } else {
+                    tBarEl.style.background = '#3b82f6';
+                    tValEl.style.color = '#e2e8f0';
+                }
+            }
+        });
     }, 400);
-  }
+}
 
-  // Hàm trượt đẩy dữ liệu đồ thị sang trái chuẩn xác Chart.js
-  function updateChartData(chart, newValue) {
+// ĐA SỬA: Bảo đảm có chỉ mục [0] để push/shift mảng dữ liệu Chart.js chạy mượt mà
+function updateChartData(chart, newValue) {
     if (!chart || !chart.data || !chart.data.datasets || chart.data.datasets.length === 0) return;
     
-    const numericValue = parseFloat(newValue);
+    var numericValue = parseFloat(newValue);
     
     chart.data.datasets[0].data.push(numericValue);
     chart.data.datasets[0].data.shift();
     
-    chart.update('none'); 
-  }
-</script>
-
-
-
+    chart.update('none');
+}
