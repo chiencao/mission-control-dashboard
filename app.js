@@ -43,7 +43,7 @@ function runDashboard() {
   L.imageOverlay('map.webp', nativeBounds).addTo(map);
   // map.fitBounds(nativeBounds); // Tự động kéo giãn ảnh vừa khít màn hình hiển thị
   // map.setView(L.latLng(500, 1000), 0); 
-  map.setView(L.latLng(500, 1000), 0); 
+  map.setView(L.latLng(500, 1000), -0.5); 
   
   // ======================
   // TRẠM MẶT ĐẤT ĐÀ NẴNG
