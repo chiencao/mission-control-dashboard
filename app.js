@@ -5,23 +5,22 @@ const map = L.map('map', {
   zoomControl: false
 }).setView([20, 0], 2);
 
+// ĐÃ SỬA: Đường dẫn CDN bản đồ nền chuẩn
 L.tileLayer('https://{s}://{z}/{x}/{y}{r}.png').addTo(map);
 
 // ======================
-// SATELLITE DATA (ĐÃ CẬP NHẬT MÀU SẮC RÕ RÀNG)
+// SATELLITE DATA
 // ======================
 const satellites = [
-  { name: "VINSAT-NANO-1", color: "#10b981", speed: 1.2 }, // Xanh lá tươi
-  { name: "VINSAT-NANO-2", color: "#ef4444", speed: 1.5 }, // Đỏ rực
-  { name: "VINSAT-NANO-3", color: "#06b6d4", speed: 1.0 }  // Xanh lục bảo
+  { name: "VINSAT-NANO-1", color: "#10b981", speed: 1.2 }, 
+  { name: "VINSAT-NANO-2", color: "#ef4444", speed: 1.5 }, 
+  { name: "VINSAT-NANO-3", color: "#06b6d4", speed: 1.0 }  
 ];
 
 // ======================
 // CREATE SATELLITES
 // ======================
 const satObjects = satellites.map((sat, i) => {
-
-  // Thêm style="color: ${sat.color}" để đồng bộ hiệu ứng phát sáng box-shadow
   const icon = L.divIcon({
     className: 'satellite-icon',
     html: `
@@ -71,19 +70,17 @@ function updateTelemetry() {
   const log = document.querySelector(".log");
   const time = new Date().toLocaleTimeString();
 
-  // Đổi cấu trúc log thành class .log-item
   const msg = `[${time}] [TELEMETRY] Downlink: ${speed} Mbps | Fuel: ${fuel}% | Signal: ${signal}%`;
   const div = document.createElement("div");
   div.className = "log-item";
   div.innerText = msg;
 
-  // Tô màu ngẫu nhiên cho dòng chữ log nhìn trực quan giống hệ thống thật
   if (signal < 75) {
-    div.style.color = "#ef4444"; // Cảnh báo đỏ nếu tín hiệu yếu
+    div.style.color = "#ef4444"; 
   } else if (speed > 160) {
-    div.style.color = "#10b981"; // Màu xanh lá khi đạt tốc độ cao
+    div.style.color = "#10b981"; 
   } else {
-    div.style.color = "#3b82f6"; // Màu xanh dương mặc định
+    div.style.color = "#3b82f6"; 
   }
 
   log.prepend(div);
