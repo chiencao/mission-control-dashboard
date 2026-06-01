@@ -16,7 +16,7 @@ function runDashboard() {
     crs: L.CRS.Simple,
     minZoom: -2,
     maxZoom: 3,
-    bounceAtZoomLimits: false, // Ngăn việc kéo bản đồ ra ngoài ranh giới ảnh
+    // bounceAtZoomLimits: false, // Ngăn việc kéo bản đồ ra ngoài ranh giới ảnh
     maxBoundsViscosity: 1.0     // Khóa chặt góc nhìn, không cho kéo lệch khỏi ảnh nền
   });
 
