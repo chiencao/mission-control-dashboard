@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>VinSpace SatOps - Command & Pass Planner</title>
+  <!-- FONT INTER & STYLE ĐỒNG BỘ -->
+  <link href="https://googleapis.com" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  
+  <style>
+    /* BỔ SUNG CSS RIÊNG CHO TRANG CẤU HÌNH & LỆNH */
+    .grid-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      padding: 20px;
+      height: 100%;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+    
+    .panel-box {
+      background: #111827;
+      border: 1px solid #1f2937;
+      border-radius: 8px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .panel-title {
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: #9ca3af;
+      border-bottom: 1px solid #1f2937;
+      padding-bottom: 10px;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* TABLE STYLE */
+    .pass-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    .pass-table th, .pass-table td {
+      padding: 12px;
+      border-bottom: 1px solid #1f2937;
+    }
+
+    .pass-table th {
+      color: #6b7280;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 11px;
+    }
+
+    .countdown-timer {
+      font-family: monospace;
+      font-size: 14px;
+      font-weight: bold;
+      color: #f59e0b;
+    }
+
+    /* TERMINAL STYLE */
+    .terminal-screen {
+      background: #070a12;
+      border: 1px solid #1f2937;
+      border-radius: 6px;
+      flex: 1;
+      min-height: 250px;
+      padding: 15px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 12px;
+      overflow-y: auto;
+      color: #3b82f6;
+    }
+
+    .terminal-input-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    .terminal-select, .terminal-btn {
+      background: #1f2937;
+      border: 1px solid #374151;
+      color: #e2e8f0;
+      padding: 10px 15px;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 13px;
+    }
+
+    .terminal-select { flex: 1; cursor: pointer; }
+    .terminal-select:focus { border-color: #3b82f6; outline: none; }
+    
+    .terminal-btn {
+      background: #3b82f6;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .terminal-btn:hover { background: #2563eb; }
+
+    /* MENU ĐIỀU HƯỚNG */
+    .nav-tabs {
+      display: flex;
+      gap: 10px;
+    }
+    .nav-link {
+      color: #9ca3af;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 4px;
+      border: 1px solid transparent;
+    }
+    .nav-link.active {
+      color: #3b82f6;
+      background: rgba(59, 130, 246, 0.1);
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+    .nav-link:hover:not(.active) {
+      color: #fff;
+      background: #1f2937;
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">▲ VINSPACE MISSION CONTROL</div>
+  
+  <!-- ĐIỀU HƯỚNG GIỮA CÁC TRANG -->
+  <nav class="nav-tabs">
+    <a href="index.html" class="nav-link">📡 TRACKING MAP</a>
+    <a href="commands.html" class="nav-link active">⚙️ COMMAND & PASSES</a>
+  </nav>
+
+  <div class="status">🟢 TRẠM ĐÀ NẴNG GS-1: KẾT NỐI ỔN ĐỊNH</div>
+</header>
+
+<div class="container">
+  <!-- GIỮ NGUYÊN PANEL TRÁI ĐỂ ĐỒNG BỘ GIAO DIỆN -->
+  <div class="left-panel">
+    <div class="card">
+      <h3>TRẠNG THÁI HỆ THỐNG</h3>
+      <div class="circle">100%</div>
+      <div class="stats">
+        <div>Vệ tinh quỹ đạo: 03/03</div>
+        <div class="green">HOẠT ĐỘNG TỐT</div>
+        <div class="warning">Cảnh báo lỗi: 00</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>TRẠM MẶT ĐẤT (GS-1)</h3>
+      <div class="green">ĐANG PHÁT (DOWNLINK)</div>
+      <div style="margin: 5px 0; color: #9ca3af;">Tx 14.25 GHz | Power: 45W</div>
+      <div class="speed">--- Mbps</div>
+    </div>
+  </div>
+
+  <!-- PHẦN CHÍNH CỦA PAGE 2: GRID PANELS -->
+  <div class="main-panel">
+    <div class="grid-layout">
+      
+      <!-- PANEL 1: LỊCH TRÌNH ĐẾM NGƯỢC (PASS PREDICTOR) -->
+      <div class="panel-box">
+        <h2 class="panel-title">
+          <span>📅 LỊCH TRÌNH BAY QUA TRẠM (PASS PREDICTOR)</span>
+          <span style="font-size: 11px; color: #10b981;">● TỰ ĐỘNG CẬP NHẬT</span>
+        </h2>
+        
+        <table class="pass-table">
+          <thead>
+            <tr>
+              <th>Vệ tinh</th>
+              <th>Thời gian tối ưu (AOS)</th>
+              <th>Thời gian phủ (Duration)</th>
+              <th>Đếm ngược (Countdown)</th>
+            </tr>
+          </thead>
+          <tbody id="pass-table-body">
+            <!-- Dữ liệu đếm ngược sẽ tự sinh bằng Javascript ở dưới -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- PANEL 2: TRUNG TÂM PHÁT LỆNH GIẢ LẬP (COMMAND TERMINAL) -->
+      <div class="panel-box">
+        <h2 class="panel-title">🛰️ TRUNG TÂM CHỈ LỆNH UPLINK</h2>
+        
+        <div class="terminal-screen" id="terminal-output">
+          <div style="color: #6b7280;">[SYSTEM] Kênh Uplink bảo mật mã hóa SHA-256 đã sẵn sàng...</div>
+        </div>
+
+        <div class="terminal-input-group">
+          <select class="terminal-select" id="sat-select">
+            <option value="VINSAT-NANO-1">VINSAT-NANO-1</option>
+            <option value="VINSAT-NANO-2">VINSAT-NANO-2</option>
+            <option value="VINSAT-NANO-3">VINSAT-NANO-3</option>
+          </select>
+
+          <select class="terminal-select" id="cmd-select">
+            <option value="PING_SYSTEM">PING_SYSTEM (Kiểm tra phản hồi)</option>
+            <option value="REBOOT_OBC">REBOOT_OBC (Khởi động lại máy tính bo mạch)</option>
+            <option value="ADJUST_ORBIT_ATTITUDE">ADJUST_ORBIT_ATTITUDE (Hiệu chỉnh góc anten)</option>
+            <option value="DEPLOY_SOLAR_ARRAY">DEPLOY_SOLAR_ARRAY (Mở lại tấm pin mặt trời)</option>
+            <option value="TRIGGER_CAM_CAPTURE">TRIGGER_CAM_CAPTURE (Kích hoạt chụp ảnh Trái Đất)</option>
+          </select>
+
+          <button class="terminal-btn" onclick="sendSatelliteCommand()">GỬI LỆNH (UPLINK)</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- JAVASCRIPT XỬ LÝ LÒGIC ĐẾM NGƯỢC VÀ CHỈ LỆNH -->
+<script>
+  // 1. Giả lập Telemetry tốc độ mạng ở Panel trái để đồng bộ với Màn hình 1
+  setInterval(() => {
+    const speedEl = document.querySelector(".speed");
+    if (speedEl) speedEl.innerText = `${(Math.random() * (180 - 120) + 120).toFixed(2)} Mbps`;
+  }, 1500);
+
+  // 2. Dữ liệu thời gian đếm ngược ban đầu (tính bằng giây)
+  const passData = [
+    { id: "sat1", name: "VINSAT-NANO-1", aos: "16:22:15", duration: "12m 45s", secondsLeft: 862 }, // 00:14:22
+    { id: "sat2", name: "VINSAT-NANO-2", aos: "17:05:40", duration: "09m 12s", secondsLeft: 3450 },
+    { id: "sat3", name: "VINSAT-NANO-3", aos: "18:40:12", duration: "15m 02s", secondsLeft: 9110 }
+  ];
+
+  // Hàm chuyển đổi giây sang định dạng HH:MM:SS
+  function formatTime(seconds) {
+    if (seconds <= 0) return "ĐANG PHỦ SÓNG (AOS)";
+    const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+    const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${h}:${m}:${s}`;
+  }
+
+  // Khởi tạo bảng danh sách lịch trình
+  function renderPassTable() {
+    const tbody = document.getElementById("pass-table-body");
+    tbody.innerHTML = "";
+    
+    passData.forEach(sat => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td style="font-weight: bold; color: #e2e8f0;">${sat.name}</td>
+        <td style="color: #9ca3af;">${sat.aos}</td>
+        <td style="color: #9ca3af;">${sat.duration}</td>
+        <td><span class="countdown-timer" id="timer-${sat.id}">${formatTime(sat.secondsLeft)}</span></td>
+      `;
+      tbody.appendChild(row);
+    });
+  }
+
+  // Chạy vòng lặp đếm ngược thời gian thực (Mỗi 1 giây trừ đi 1 giây)
+  setInterval(() => {
+    passData.forEach(sat => {
+      if (sat.secondsLeft > 0) {
+        sat.secondsLeft--;
+      } else {
+        // Nếu đếm ngược về 0, reset lại một chu kỳ ngẫu nhiên mới
+        sat.secondsLeft = Math.floor(Math.random() * 5000) + 1000;
+      }
+      
+      const timerEl = document.getElementById(`timer-${sat.id}`);
+      if (timerEl) {
+        timerEl.innerText = formatTime(sat.secondsLeft);
+        // Đổi màu cảnh báo nếu thời gian dưới 3 phút (180 giây)
+        if (sat.secondsLeft < 180) {
+          timerEl.style.color = "#10b981"; // Đổi sang xanh lục báo sắp kết nối được
+        } else {
+          timerEl.style.color = "#f59e0b";
+        }
+      }
+    });
+  }, 1000);
+
+  // Gọi vẽ bảng lần đầu
+  renderPassTable();
+
+  // 3. Logic xử lý giả lập gửi lệnh lên vệ tinh
+  function sendSatelliteCommand() {
+    const satName = document.getElementById("sat-select").value;
+    const cmdName = document.getElementById("cmd-select").value;
+    const terminal = document.getElementById("terminal-output");
+    const time = new Date().toLocaleTimeString();
+
+    // Tạo dòng thông báo log gửi lệnh
+    const sendLog = document.createElement("div");
+    sendLog.style.color = "#e2e8f0";
+    sendLog.style.marginTop = "8px";
+    sendLog.innerText = `[${time}] >>> ĐANG PHÁT LỆNH UPLINK: [${cmdName}] TỚI [${satName}]...`;
+    terminal.appendChild(sendLog);
+
+    // Giả lập phản hồi trễ từ vũ trụ sau 1.2 giây (Mô phỏng khoảng cách không gian)
+    setTimeout(() => {
+      const responseLog = document.createElement("div");
+      responseLog.style.color = "#10b981";
+      responseLog.innerText = `[${new Date().toLocaleTimeString()}] <<< [${satName}] PHẢN HỒI: Thực thi lệnh [${cmdName}] THÀNH CÔNG. Mã trạng thái: ACK_0x01`;
+      terminal.appendChild(responseLog);
+      
