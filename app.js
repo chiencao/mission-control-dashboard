@@ -68,14 +68,14 @@ function runDashboard() {
   const satellites = [
     { name: "VINSAT-NANO-1", color: "#10b981", speed: 4, heightY: 600 },  // Bay thẳng ở trục Y = 600
     { name: "VINSAT-NANO-2", color: "#ef4444", speed: 6, heightY: 540 },  // Bay thẳng đi qua Trạm Đà Nẵng (Y = 540)
-    { name: "VINSAT-NANO-3", color: "#06b6d4", speed: 3, heightY: 450 }   // Bay thẳng ở trục Y = 450
+    { name: "VINSAT-NANO-3", color: "#06b6d4", speed: 3, heightY: 450 },   // Bay thẳng ở trục Y = 450
     { name: "VINSAT-NANO-4", color: "#ef4444", speed: 6, heightY: 540 },  // Bay thẳng đi qua Trạm Đà Nẵng (Y = 540)
     { name: "VINSAT-NANO-5", color: "#ef4444", speed: 7, heightY: 540 },  // Bay thẳng đi qua Trạm Đà Nẵng (Y = 540)
     { name: "VINSAT-NANO-6", color: "#ef4444", speed: 4, heightY: 540 },  // Bay thẳng đi qua Trạm Đà Nẵng (Y = 540)
     { name: "VINSAT-NANO-7", color: "#ef4444", speed: 3, heightY: 540 },  // Bay thẳng đi qua Trạm Đà Nẵng (Y = 540)
     { name: "VINSAT-NANO-8", color: "#ef4444", speed: 5, heightY: 540 },  // Bay thẳng đi qua Trạm Đà Nẵng (Y = 540)
     { name: "VINSAT-NANO-9", color: "#ef4444", speed: 2, heightY: 540 },  // Bay thẳng đi qua Trạm Đà Nẵng (Y = 540)
-    { name: "VINSAT-NANO-10", color: "#ef4444", speed: 9, heightY: 540 },  // Bay thẳng đi qua Trạm Đà Nẵng (Y = 540)
+    { name: "VINSAT-NANO-10", color: "#ef4444", speed: 9, heightY: 540 }  // Bay thẳng đi qua Trạm Đà Nẵng (Y = 540)
   ];
 
   // ======================
