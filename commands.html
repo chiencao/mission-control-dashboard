@@ -237,7 +237,7 @@
 
   // 2. Dữ liệu thời gian đếm ngược ban đầu (tính bằng giây)
   const passData = [
-    { id: "sat1", name: "VINSAT-NANO-1", aos: "16:22:15", duration: "12m 45s", secondsLeft: 862 }, // 00:14:22
+    { id: "sat1", name: "VINSAT-NANO-1", aos: "16:22:15", duration: "12m 45s", secondsLeft: 862 }, 
     { id: "sat2", name: "VINSAT-NANO-2", aos: "17:05:40", duration: "09m 12s", secondsLeft: 3450 },
     { id: "sat3", name: "VINSAT-NANO-3", aos: "18:40:12", duration: "15m 02s", secondsLeft: 9110 }
   ];
@@ -254,8 +254,9 @@
   // Khởi tạo bảng danh sách lịch trình
   function renderPassTable() {
     const tbody = document.getElementById("pass-table-body");
-    tbody.innerHTML = "";
+    if (!tbody) return; // Chống lỗi nếu phần tử chưa load xong
     
+    tbody.innerHTML = "";
     passData.forEach(sat => {
       const row = document.createElement("tr");
       row.innerHTML = `
@@ -268,31 +269,31 @@
     });
   }
 
-  // Chạy vòng lặp đếm ngược thời gian thực (Mỗi 1 giây trừ đi 1 giây)
-  setInterval(() => {
-    passData.forEach(sat => {
-      if (sat.secondsLeft > 0) {
-        sat.secondsLeft--;
-      } else {
-        // Nếu đếm ngược về 0, reset lại một chu kỳ ngẫu nhiên mới
-        sat.secondsLeft = Math.floor(Math.random() * 5000) + 1000;
-      }
-      
-      const timerEl = document.getElementById(`timer-${sat.id}`);
-      if (timerEl) {
-        timerEl.innerText = formatTime(sat.secondsLeft);
-        // Đổi màu cảnh báo nếu thời gian dưới 3 phút (180 giây)
-        if (sat.secondsLeft < 180) {
-          timerEl.style.color = "#10b981"; // Đổi sang xanh lục báo sắp kết nối được
-        } else {
-          timerEl.style.color = "#f59e0b";
-        }
-      }
-    });
-  }, 1000);
+  // ĐÃ SỬA: Ép mã chạy sau khi toàn bộ giao diện HTML đã dựng xong xuôi (DOM Ready)
+  document.addEventListener("DOMContentLoaded", () => {
+    renderPassTable();
 
-  // Gọi vẽ bảng lần đầu
-  renderPassTable();
+    // Chạy vòng lặp đếm ngược thời gian thực (Mỗi 1 giây trừ đi 1 giây)
+    setInterval(() => {
+      passData.forEach(sat => {
+        if (sat.secondsLeft > 0) {
+          sat.secondsLeft--;
+        } else {
+          sat.secondsLeft = Math.floor(Math.random() * 5000) + 1000;
+        }
+        
+        const timerEl = document.getElementById(`timer-${sat.id}`);
+        if (timerEl) {
+          timerEl.innerText = formatTime(sat.secondsLeft);
+          if (sat.secondsLeft < 180) {
+            timerEl.style.color = "#10b981"; 
+          } else {
+            timerEl.style.color = "#f59e0b";
+          }
+        }
+      });
+    }, 1000);
+  });
 
   // 3. Logic xử lý giả lập gửi lệnh lên vệ tinh
   function sendSatelliteCommand() {
@@ -301,17 +302,22 @@
     const terminal = document.getElementById("terminal-output");
     const time = new Date().toLocaleTimeString();
 
-    // Tạo dòng thông báo log gửi lệnh
     const sendLog = document.createElement("div");
     sendLog.style.color = "#e2e8f0";
     sendLog.style.marginTop = "8px";
     sendLog.innerText = `[${time}] >>> ĐANG PHÁT LỆNH UPLINK: [${cmdName}] TỚI [${satName}]...`;
     terminal.appendChild(sendLog);
 
-    // Giả lập phản hồi trễ từ vũ trụ sau 1.2 giây (Mô phỏng khoảng cách không gian)
     setTimeout(() => {
       const responseLog = document.createElement("div");
       responseLog.style.color = "#10b981";
       responseLog.innerText = `[${new Date().toLocaleTimeString()}] <<< [${satName}] PHẢN HỒI: Thực thi lệnh [${cmdName}] THÀNH CÔNG. Mã trạng thái: ACK_0x01`;
       terminal.appendChild(responseLog);
+      terminal.scrollTop = terminal.scrollHeight;
+    }, 1200);
+
+    terminal.scrollTop = terminal.scrollHeight;
+  }
+</script>
+
       
