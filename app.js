@@ -19,11 +19,14 @@ function runDashboard() {
   // ĐÃ SỬA CHUẨN: Thay thế đường dẫn lỗi bằng Map Tiles tối của CartoDB
  
    
-    // ĐÃ SỬA CỐ ĐỊNH URL: Loại bỏ {s} để tránh trình duyệt dịch sai cấu trúc link
-  L.tileLayer('https://cartocdn.com{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap &copy; CARTO',
+ 
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    subdomains: 'abcd',
     maxZoom: 20
-  }).addTo(map);
+}).addTo(map);
+
 
 
 
