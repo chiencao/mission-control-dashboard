@@ -16,14 +16,6 @@ function runDashboard() {
     attributionControl: false
   }).setView([16.0, 108.0], 3);
 
-     // ======================
-  // INIT MAP
-  // ======================
-  // Đã sửa: Đặt tâm bản đồ ngay tại khu vực Đông Nam Á để nhìn rõ Việt Nam
-  const map = L.map('map', {
-    zoomControl: true,
-    attributionControl: false
-  }).setView([16.0, 108.0], 3);
 
   // THAY THẾ CHÍNH XÁC ĐOẠN NÀY ĐỂ HẾT LỖI ERR_NAME_NOT_RESOLVED:
   L.tileLayer('https://{s}://{z}/{x}/{y}{r}.png', {
