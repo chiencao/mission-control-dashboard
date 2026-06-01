@@ -10,45 +10,43 @@ function runDashboard() {
   // ======================
   // INIT MAP
   // ======================
-  // Khởi tạo bản đồ ngay tại khu vực Đông Nam Á để nhìn rõ Việt Nam
   const map = L.map('map', {
     zoomControl: true,
     attributionControl: false
   }).setView([16.0, 108.0], 4);
 
   // ======================
-  // ĐA LỚP BẢN ĐỒ (CỐ ĐỊNH URL - KHÔNG LO LỖI)
+  // ĐA LỚP BẢN ĐỒ (ĐƯỜNG DẪN CỐ ĐỊNH - KHÔNG LO LỖI SUBDOMAIN)
   // ======================
-  // 1. Bản đồ nền tối CartoDB (Rất hợp với phong cách Dashboard Không gian)
-  const cartoDark = L.tileLayer('https://{s}://{z}/{x}/{y}{r}.png', {
-    subdomains: 'abcd',
+  // 1. Bản đồ nền tối CartoDB chuẩn không dùng biến {s}
+  const cartoDark = L.tileLayer('https://cartocdn.com{z}/{x}/{y}.png', {
     maxZoom: 20
   });
 
-  // 2. Bản đồ Vệ tinh Google (Bổ sung theo yêu cầu - Độ chi tiết cực cao)
+  // 2. Bản đồ Vệ tinh Google Map chuẩn không dùng biến {s}
   const googleSatellite = L.tileLayer('https://google.com{x}&y={y}&z={z}', {
     maxZoom: 20
   });
 
-  // Mặc định hiển thị bản đồ nền tối khi vừa tải trang
+  // Mặc định hiển thị bản đồ nền tối khi tải trang
   cartoDark.addTo(map);
 
-  // Tạo menu chọn lớp ở góc trên bên phải màn hình
+  // Gắn menu chọn lớp ở góc trên bên phải bản đồ
   const baseMaps = {
     "🌌 Bản đồ Tối (CartoDB)": cartoDark,
     "🛰️ Vệ tinh Đậm nét (Google)": googleSatellite
   };
   L.control.layers(baseMaps, null, { position: 'topright' }).addTo(map);
 
-  // Ép bản đồ tự động vẽ lại sau 200ms để chống lỗi sập giao diện Flexbox/Khuất màn hình
+  // Ép bản đồ tự động vẽ lại sau 200ms để chống lỗi khuất giao diện Flexbox
   setTimeout(() => { 
     map.invalidateSize(); 
   }, 200);
 
   // ======================
-  // ĐA THÊM: TRẠM MẶT ĐẤT ĐÀ NẴNG
+  // TRẠM MẶT ĐẤT ĐÀ NẴNG
   // ======================
-  const danangCoords = [16.047, 108.206]; // Tọa độ thực tế Đà Nẵng
+  const danangCoords = [16.047, 108.206];
   
   const groundStationIcon = L.divIcon({
     className: 'gs-icon',
@@ -86,12 +84,11 @@ function runDashboard() {
       iconAnchor: [5, 5]
     });
 
-    // Phát tán vị trí ban đầu lệch nhau trên quỹ đạo vòng quanh Trái Đất
     const initialLng = i * 120 - 180; 
 
     return {
       ...sat,
-      lat: 16.0, // Bắt đầu ở vĩ độ Đà Nẵng
+      lat: 16.0, 
       lng: initialLng,
       marker: L.marker([16.0, initialLng], { icon }).addTo(map)
     };
@@ -103,14 +100,6 @@ function runDashboard() {
   setInterval(() => {
     satObjects.forEach(sat => {
       sat.lng += sat.speed;
-      
-      /* 
-        TỐI ƯU QUỸ ĐẠO: 
-        - Lấy vĩ độ 16.5 làm trục tâm (độ cao của Việt Nam).
-        - Biên độ hình sin thu hẹp còn 12 độ để vệ tinh dao động liên tục 
-          trong khoảng từ vĩ độ 4.5 (Nam Bộ) đến vĩ độ 28.5 (Bắc Bộ).
-        - Khi kinh độ (lng) quét qua vùng 102 đến 110, vệ tinh CHẮC CHẮN cắt thẳng qua Việt Nam.
-      */
       sat.lat = 16.5 + (12 * Math.sin(sat.lng * Math.PI / 90));
 
       if (sat.lng > 180) {
