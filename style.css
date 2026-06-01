@@ -1,15 +1,43 @@
+/* SATELLITE */
+.satellite-icon {
+  display: flex;
+  align-items: center;
+}
+
+.sat-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  box-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
+}
+
+.sat-label {
+  margin-left: 6px;
+  font-size: 11px;
+  color: white;
+  white-space: nowrap;
+}
+
+/* Đảm bảo khung chứa bản đồ có chiều cao cố định hoặc co giãn theo Flexbox */
 .container {
   display: flex;
-  height: calc(100vh - 70px);
+  height: calc(100vh - 60px); /* Trừ đi chiều cao header */
 }
 
 .main-panel {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  flex: 1;
 }
 
 #map {
   width: 100%;
-  flex: 1;
+  height: 70%; /* Chiếm 70% chiều cao của main-panel, phần còn lại cho log */
+}
+
+.log {
+  height: 30%;
+  background: #111;
+  color: #fff;
+  overflow-y: auto;
 }
