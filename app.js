@@ -8,17 +8,17 @@ const initWhenReady = setInterval(() => {
 
 function runDashboard() {
   // ======================
-  // INIT MAP (Chuyển sang hệ tọa độ phẳng đơn giản để dùng ảnh cục bộ)
+  // INIT MAP (Hệ tọa độ phẳng đơn giản để dùng ảnh cục bộ)
   // ======================
   const map = L.map('map', {
     zoomControl: true,
     attributionControl: false,
-    crs: L.CRS.Simple, // Bắt buộc để dùng 1 file ảnh duy nhất không cần chia nhỏ mảnh
+    crs: L.CRS.Simple, // Bắt buộc để dùng 1 file ảnh duy nhất
     minZoom: -2,
     maxZoom: 2
   });
 
-  // Kích thước giả lập cho bản đồ phẳng (Căn theo tỉ lệ ảnh map.webp của bạn)
+  // Định vị khung đồ họa chuẩn tỉ lệ ảnh 2000 x 1000
   const bounds = [[0, 0], [1000, 2000]]; 
 
   // ======================
@@ -28,9 +28,9 @@ function runDashboard() {
   map.fitBounds(bounds); // Tự động căn bản đồ vừa khít khung hiển thị
 
   // ======================
-  // TRẠM MẶT ĐẤT ĐÀ NẴNG (Chuyển đổi sang tọa độ phẳng tương đối trên ảnh)
+  // TRẠM MẶT ĐẤT ĐÀ NẴNG (Tọa độ X=1600, Y=540 tương đối trên ảnh 2K)
   // ======================
-  const danangCoords =; // Tọa độ X, Y tương ứng với vị trí Việt Nam trên ảnh nền xám
+  const danangCoords =; 
   
   const groundStationIcon = L.divIcon({
     className: 'gs-icon',
@@ -49,7 +49,7 @@ function runDashboard() {
   // SATELLITE DATA
   // ======================
   const satellites = [
-    { name: "VINSAT-NANO-1", color: "#10b981", speed: 4 },  // Tăng speed do hệ tọa độ mới lớn hơn
+    { name: "VINSAT-NANO-1", color: "#10b981", speed: 4 },  
     { name: "VINSAT-NANO-2", color: "#ef4444", speed: 6 }, 
     { name: "VINSAT-NANO-3", color: "#06b6d4", speed: 3 }  
   ];
@@ -68,14 +68,13 @@ function runDashboard() {
       iconAnchor: [5, 5]
     });
 
-    // Điểm xuất phát trải dài trên chiều rộng trục X của ảnh (0 đến 2000)
     const initialX = i * 600 + 200; 
 
     return {
       ...sat,
       x: initialX,
-      y: 500, 
-      marker: L.marker([500, initialX], { icon }).addTo(map)
+      y: 540, 
+      marker: L.marker([540, initialX], { icon }).addTo(map)
     };
   });
 
@@ -86,7 +85,7 @@ function runDashboard() {
     satObjects.forEach(sat => {
       sat.x += sat.speed;
       // Tạo quỹ đạo hình sin uốn lượn chạy ngang màn hình ảnh
-      sat.y = 500 + (250 * Math.sin(sat.x * Math.PI / 400));
+      sat.y = 540 + (200 * Math.sin(sat.x * Math.PI / 400));
 
       // Reset khi bay hết mép phải của ảnh map.webp
       if (sat.x > 2000) {
@@ -98,7 +97,7 @@ function runDashboard() {
   }, 50);
 
   // ======================
-  // TELEMETRY REAL-TIME DATA (Giữ nguyên logic của bạn)
+  // TELEMETRY REAL-TIME DATA (Giữ nguyên logic cũ của bạn)
   // ======================
   function random(min, max) {
     return (Math.random() * (max - min) + min).toFixed(2);
