@@ -268,6 +268,21 @@ setInterval(() => {
   updateChart(tempChart, 30, 80);
 }, 300);
 
+  function generateHistory(chart, min, max) {
+
+  for (let i = 0; i < 120; i++) {  // ~120 points = fake 1 ngày
+
+    chart.data.labels.push("");
+
+    chart.data.datasets.forEach(ds => {
+      ds.data.push(noisy(min, max));
+    });
+
+  }
+
+  chart.update();
+}
+  
 </script>
 
 </body>
