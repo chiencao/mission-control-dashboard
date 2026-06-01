@@ -367,8 +367,18 @@
   }, 400);
 
   // Hàm trượt đẩy dữ liệu đồ thị sang trái (Đã sửa thêm index [0] chuẩn Chart.js)
+    // ĐÃ SỬA CHUẨN: Truy cập chính xác vào mảng datasets[0] của Chart.js v4
   function updateChartData(chart, newValue) {
-    chart.data.datasets[0].data.push(newValue);
+    if (!chart || !chart.data || !chart.data.datasets || chart.data.datasets.length === 0) return;
+    
+    // Ép kiểu dữ liệu về dạng số để Chart.js vẽ mượt mà
+    const numericValue = parseFloat(newValue);
+    
+    // Đẩy dữ liệu mới vào cuối mảng và cắt bỏ điểm đầu tiên để tạo hiệu ứng trượt sóng
+    chart.data.datasets[0].data.push(numericValue);
     chart.data.datasets[0].data.shift();
-    chart.update();
+    
+    // Lệnh ép Chart.js render lại khung hình ngay lập tức
+    chart.update('none'); // Dùng 'none' để tắt hiệu ứng chuyển động mặc định, giúp sóng nhạc mượt và nhanh hơn
   }
+
