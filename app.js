@@ -10,32 +10,43 @@ function runDashboard() {
   // ======================
   // INIT MAP
   // ======================
-  // Đã sửa: Đặt tâm bản đồ ngay tại khu vực Đông Nam Á để nhìn rõ Việt Nam
+  // Khởi tạo bản đồ ngay tại khu vực Đông Nam Á để nhìn rõ Việt Nam
   const map = L.map('map', {
     zoomControl: true,
     attributionControl: false
-  }).setView([16.0, 108.0], 3);
+  }).setView([16.0, 108.0], 4);
 
-  // ĐÃ SỬA CHUẨN: Thay thế đường dẫn lỗi bằng Map Tiles tối của CartoDB
- 
-   
- L.tileLayer('https://{s}://{z}/{x}/{y}.png', {
+  // ======================
+  // ĐA LỚP BẢN ĐỒ (CỐ ĐỊNH URL - KHÔNG LO LỖI)
+  // ======================
+  // 1. Bản đồ nền tối CartoDB (Rất hợp với phong cách Dashboard Không gian)
+  const cartoDark = L.tileLayer('https://{s}://{z}/{x}/{y}{r}.png', {
     subdomains: 'abcd',
-    maxZoom: 20,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com">CARTO</a>'
-}).addTo(map);
+    maxZoom: 20
+  });
 
+  // 2. Bản đồ Vệ tinh Google (Bổ sung theo yêu cầu - Độ chi tiết cực cao)
+  const googleSatellite = L.tileLayer('https://google.com{x}&y={y}&z={z}', {
+    maxZoom: 20
+  });
 
+  // Mặc định hiển thị bản đồ nền tối khi vừa tải trang
+  cartoDark.addTo(map);
 
+  // Tạo menu chọn lớp ở góc trên bên phải màn hình
+  const baseMaps = {
+    "🌌 Bản đồ Tối (CartoDB)": cartoDark,
+    "🛰️ Vệ tinh Đậm nét (Google)": googleSatellite
+  };
+  L.control.layers(baseMaps, null, { position: 'topright' }).addTo(map);
 
-
-  // ĐÃ SỬA: Ép bản đồ tự động vẽ lại sau 200ms để chống lỗi sập giao diện Flexbox
+  // Ép bản đồ tự động vẽ lại sau 200ms để chống lỗi sập giao diện Flexbox/Khuất màn hình
   setTimeout(() => { 
     map.invalidateSize(); 
   }, 200);
 
   // ======================
-  // ĐÃ THÊM: TRẠM MẶT ĐẤT ĐÀ NẴNG
+  // ĐA THÊM: TRẠM MẶT ĐẤT ĐÀ NẴNG
   // ======================
   const danangCoords = [16.047, 108.206]; // Tọa độ thực tế Đà Nẵng
   
