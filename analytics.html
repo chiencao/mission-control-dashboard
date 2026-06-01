@@ -4,10 +4,7 @@
 <meta charset="UTF-8">
 <title>Telemetry Dashboard</title>
 
-<!-- FONT -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-
-<!-- CHART -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -16,7 +13,7 @@ body {
   font-family: 'Inter', sans-serif;
   background: #0b0f17;
   color: #cbd5f5;
-  overflow: hidden; /* 🔥 no scroll */
+  overflow: hidden;
 }
 
 /* HEADER */
@@ -29,15 +26,9 @@ body {
   border-bottom: 1px solid #1f2937;
 }
 
-.logo {
-  font-weight: 800;
-  color: #38bdf8;
-}
+.logo { font-weight: 800; color: #38bdf8; }
 
-.nav-tabs {
-  display: flex;
-  gap: 10px;
-}
+.nav-tabs { display: flex; gap: 10px; }
 
 .nav-link {
   color: #9ca3af;
@@ -53,23 +44,31 @@ body {
   background: rgba(59,130,246,0.1);
 }
 
-.nav-link:hover {
+.nav-link:hover { background: #1f2937; }
+
+.status { font-size: 12px; color: #22c55e; }
+
+/* MODE BUTTON */
+.mode-box { display: flex; gap: 5px; }
+
+button {
   background: #1f2937;
+  border: none;
+  color: #cbd5f5;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 11px;
 }
 
-.status {
-  font-size: 12px;
-  color: #22c55e;
-}
+button:hover { background: #374151; }
 
-/* MAIN LAYOUT */
+/* MAIN */
 .container {
   height: calc(100vh - 70px);
   display: flex;
   flex-direction: column;
 }
 
-/* mỗi chart chiếm 50% */
 .card {
   flex: 1;
   display: flex;
@@ -79,25 +78,21 @@ body {
   padding: 10px;
 }
 
-/* phân cách 2 chart */
 .card:first-child {
   border-bottom: 1px solid #1f2937;
 }
 
-/* title */
 .card h3 {
   margin: 0 0 5px 0;
   font-size: 12px;
   color: #9ca3af;
 }
 
-/* wrapper giữ kích thước */
 .canvas-wrapper {
   flex: 1;
   position: relative;
 }
 
-/* canvas fill 100% */
 .canvas-wrapper canvas {
   position: absolute;
   width: 100% !important;
@@ -108,22 +103,28 @@ body {
 
 <body>
 
-<!-- HEADER -->
 <header class="header">
   <div class="logo">▲ VINSPACE MISSION CONTROL</div>
-  
+
   <nav class="nav-tabs">
     <a href="index.html" class="nav-link">📡 TRACKING MAP</a>
-    <a href="analytics.html" class="nav-link active">📊 TELEMETRY CHART</a>
-    <a href="commands.html" class="nav-link">⚙️ COMMAND & PASSES</a>
+    <a href="analytics.html" class="nav-link active">📊 TELEMETRY</a>
+    <a href="commands.html" class="nav-link">⚙️ COMMAND</a>
   </nav>
 
-  <div class="status">🟢 TRẠM VINUNIVERSITY GS-1: KẾT NỐI ỔN ĐỊNH</div>
+  <!-- MODE SWITCH -->
+  <div class="mode-box">
+    <button onclick="setMode('minute')">1m</button>
+    <button onclick="setMode('hour')">1h</button>
+    <button onclick="setMode('day')">1d</button>
+    <button onclick="setMode('week')">1w</button>
+  </div>
+
+  <div class="status">🟢 VINUNI GS-1 ONLINE</div>
 </header>
 
 <div class="container">
 
-  <!-- BATTERY -->
   <div class="card">
     <h3>🔋 BATTERY VOLTAGE</h3>
     <div class="canvas-wrapper">
@@ -131,7 +132,6 @@ body {
     </div>
   </div>
 
-  <!-- TEMPERATURE -->
   <div class="card">
     <h3>🌡 TEMPERATURE</h3>
     <div class="canvas-wrapper">
@@ -142,123 +142,111 @@ body {
 </div>
 
 <script>
-// =======================
-// SATELLITES
-// =======================
-const sats = [
-  { name: "VINSAT-1", color: "#4ade80" },
-  { name: "VINSAT-2", color: "#facc15" },
-  { name: "VINSAT-3", color: "#60a5fa" },
-  { name: "VINSAT-4", color: "#f97316" },
-  { name: "VINSAT-5", color: "#f97316" },
-  { name: "VINSAT-6", color: "#f97316" },
-  { name: "VINSAT-7", color: "#f97316" },
-  { name: "VINSAT-8", color: "#f97316" },
-  { name: "VINSAT-9", color: "#f97316" },
-  { name: "VINSAT-10", color: "#f97316" }
-];
+// ================= SAT BEHAVIOR =================
+const sats = Array.from({ length: 10 }, (_, i) => ({
+  name: "SAT-" + (i + 1),
+  color: `hsl(${i * 36}, 80%, 60%)`,
+  base: 3 + Math.random(),
+  noise: 0.5 + Math.random(),
+  dropChance: 0.01 + Math.random() * 0.02,
+  anomalyChance: 0.05
+}));
 
+// ================= MODE =================
+let mode = "day";
+const modeConfig = {
+  minute: 60,
+  hour: 120,
+  day: 200,
+  week: 300
+};
+
+// ================= DATASET =================
 function createDatasets() {
   return sats.map(s => ({
     label: s.name,
     borderColor: s.color,
     data: [],
-    borderWidth: 1.2,
+    borderWidth: 1,
     pointRadius: 0,
-    tension: 0 // 🔥 giống grafana
+    tension: 0
   }));
 }
 
-// =======================
-// INIT CHART
-// =======================
-const batteryChart = new Chart(
-  document.getElementById("batteryChart"),
-  {
+// ================= CHART =================
+function createChart(id, min, max, unit) {
+  return new Chart(document.getElementById(id), {
     type: "line",
     data: { labels: [], datasets: createDatasets() },
     options: {
       animation: false,
       maintainAspectRatio: false,
-      plugins: {
-        legend: { labels: { color: "#cbd5f5" } }
-      },
+      plugins: { legend: { labels: { color: "#cbd5f5" } } },
       scales: {
         y: {
-          min: 0,
-          max: 5,
+          min, max,
           grid: { color: "#1f2937" },
           ticks: {
             color: "#94a3b8",
-            callback: v => v + " V"
+            callback: v => v + " " + unit
           }
         },
-        x: {
-          grid: { color: "#111827" },
-          ticks: { display: false }
-        }
+        x: { grid: { color: "#111827" }, ticks: { display: false } }
       }
     }
-  }
-);
-
-const tempChart = new Chart(
-  document.getElementById("tempChart"),
-  {
-    type: "line",
-    data: { labels: [], datasets: createDatasets() },
-    options: {
-      animation: false,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { labels: { color: "#cbd5f5" } }
-      },
-      scales: {
-        y: {
-          min: 20,
-          max: 90,
-          grid: { color: "#1f2937" },
-          ticks: {
-            color: "#94a3b8",
-            callback: v => v + "°C"
-          }
-        },
-        x: {
-          grid: { color: "#111827" },
-          ticks: { display: false }
-        }
-      }
-    }
-  }
-);
-
-// preload dữ liệu 1 ngày
-generateHistory(batteryChart, 2.5, 5);
-generateHistory(tempChart, 30, 80);
-
-// =======================
-// NOISY DATA (GIỐNG ẢNH)
-// =======================
-function noisy(min, max) {
-  let val = Math.random() * (max - min) + min;
-
-  // spike mạnh kiểu telemetry thật
-  if (Math.random() < 0.15) {
-    val = Math.random() * (max - min);
-  }
-
-  return val.toFixed(2);
+  });
 }
 
-function updateChart(chart, min, max) {
+const batteryChart = createChart("batteryChart", 0, 5, "V");
+const tempChart = createChart("tempChart", 20, 90, "°C");
+
+// ================= VALUE ENGINE =================
+function generateValue(sat, min, max, type) {
+
+  let val = sat.base + (Math.random() - 0.5) * sat.noise;
+
+  // battery drop
+  if (Math.random() < sat.dropChance && type === "battery") {
+    val = Math.random() * 0.3;
+  }
+
+  // anomaly
+  if (Math.random() < sat.anomalyChance) {
+    val = Math.random() * (max - min) + min;
+  }
+
+  return Math.max(min, Math.min(max, val)).toFixed(2);
+}
+
+// ================= INITIAL HISTORY =================
+function generateHistory(chart, min, max, type) {
+
+  const points = modeConfig[mode];
+  chart.data.labels = [];
+
+  chart.data.datasets.forEach(ds => ds.data = []);
+
+  for (let i = 0; i < points; i++) {
+    chart.data.labels.push("");
+
+    chart.data.datasets.forEach((ds, idx) => {
+      ds.data.push(generateValue(sats[idx], min, max, type));
+    });
+  }
+
+  chart.update();
+}
+
+// ================= UPDATE =================
+function updateChart(chart, min, max, type) {
 
   chart.data.labels.push("");
 
-  chart.data.datasets.forEach(ds => {
-    ds.data.push(noisy(min, max));
+  chart.data.datasets.forEach((ds, idx) => {
+    ds.data.push(generateValue(sats[idx], min, max, type));
   });
 
-  if (chart.data.labels.length > 100) {
+  if (chart.data.labels.length > modeConfig[mode]) {
     chart.data.labels.shift();
     chart.data.datasets.forEach(ds => ds.data.shift());
   }
@@ -266,27 +254,25 @@ function updateChart(chart, min, max) {
   chart.update("none");
 }
 
-// LOOP
+// ================= MODE SWITCH =================
+function setMode(m) {
+  mode = m;
+  initAll();
+}
+
+// ================= INIT =================
+function initAll() {
+  generateHistory(batteryChart, 0, 5, "battery");
+  generateHistory(tempChart, 20, 90, "temp");
+}
+
+// ================= LOOP =================
 setInterval(() => {
-  updateChart(batteryChart, 2.5, 5);
-  updateChart(tempChart, 30, 80);
+  updateChart(batteryChart, 0, 5, "battery");
+  updateChart(tempChart, 20, 90, "temp");
 }, 300);
 
-  function generateHistory(chart, min, max) {
-
-  for (let i = 0; i < 120; i++) {  // ~120 points = fake 1 ngày
-
-    chart.data.labels.push("");
-
-    chart.data.datasets.forEach(ds => {
-      ds.data.push(noisy(min, max));
-    });
-
-  }
-
-  chart.update();
-}
-  
+initAll();
 </script>
 
 </body>
