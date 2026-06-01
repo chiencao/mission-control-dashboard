@@ -17,7 +17,6 @@ function runDashboard() {
     zoomSnap: 0.1,  
     minZoom: -2,
     maxZoom: 3,
-    // bounceAtZoomLimits: false, // Ngăn việc kéo bản đồ ra ngoài ranh giới ảnh
     maxBoundsViscosity: 1.0     // Khóa chặt góc nhìn, không cho kéo lệch khỏi ảnh nền
   });
 
@@ -37,13 +36,10 @@ function runDashboard() {
   // Ép bản đồ giới hạn nghiêm ngặt trong khung ảnh này để tránh viền xám đen bên ngoài
   map.setMaxBounds(nativeBounds);
   
-
   // ======================
   // SỬ DỤNG HÌNH ẢNH MAP.WEBP TỪ REPO CỦA BẠN
   // ======================
   L.imageOverlay('map.webp', nativeBounds).addTo(map);
-  // map.fitBounds(nativeBounds); // Tự động kéo giãn ảnh vừa khít màn hình hiển thị
-  // map.setView(L.latLng(500, 1000), 0); 
   map.setView(L.latLng(500, 1000), -0.5); 
   
   // ======================
@@ -63,19 +59,24 @@ function runDashboard() {
   L.marker(stationPoint, { icon: groundStationIcon }).addTo(map);
 
   // ======================
-  // SATELLITE DATA (Cấu hình độ cao bay cố định)
+  // SATELLITE DATA (ĐÃ RANDOM MÀU & CONFIG BAY THẲNG TỪ TRÊN XUỐNG)
   // ======================
+  const colorsList = ["#10b981", "#ef4444", "#06b6d4", "#f59e0b", "#a855f7", "#3b82f6", "#ec4899", "#14b8a6", "#f43f5e", "#0284c7"];
+  
+  // Thuật toán trộn ngẫu nhiên bảng màu khi tải trang
+  const shuffledColors = colorsList.sort(function() { return 0.5 - Math.random(); });
+
   const satellites = [
-    { name: "VINSAT-NANO-1", color: "#10b981", speed: 4, heightY: 600 },  // Bay thẳng ở trục Y = 600
-    { name: "VINSAT-NANO-2", color: "#ef4444", speed: 6, heightY: 540 },  // Bay thẳng đi qua Trạm Đà Nẵng (Y = 540)
-    { name: "VINSAT-NANO-3", color: "#06b6d4", speed: 3, heightY: 450 },   // Bay thẳng ở trục Y = 450
-    { name: "VINSAT-NANO-4", color: "#ef4444", speed: 6, heightY: 540 },  // Bay thẳng đi qua Trạm Đà Nẵng (Y = 540)
-    { name: "VINSAT-NANO-5", color: "#ef4444", speed: 7, heightY: 540 },  // Bay thẳng đi qua Trạm Đà Nẵng (Y = 540)
-    { name: "VINSAT-NANO-6", color: "#ef4444", speed: 4, heightY: 540 },  // Bay thẳng đi qua Trạm Đà Nẵng (Y = 540)
-    { name: "VINSAT-NANO-7", color: "#ef4444", speed: 3, heightY: 540 },  // Bay thẳng đi qua Trạm Đà Nẵng (Y = 540)
-    { name: "VINSAT-NANO-8", color: "#ef4444", speed: 5, heightY: 540 },  // Bay thẳng đi qua Trạm Đà Nẵng (Y = 540)
-    { name: "VINSAT-NANO-9", color: "#ef4444", speed: 2, heightY: 540 },  // Bay thẳng đi qua Trạm Đà Nẵng (Y = 540)
-    { name: "VINSAT-NANO-10", color: "#ef4444", speed: 9, heightY: 540 }  // Bay thẳng đi qua Trạm Đà Nẵng (Y = 540)
+    { name: "VINSAT-NANO-1", color: shuffledColors[0], speed: 4, fixedX: 200 },  
+    { name: "VINSAT-NANO-2", color: shuffledColors[1], speed: 6, fixedX: 400 },  
+    { name: "VINSAT-NANO-3", color: shuffledColors[2], speed: 3, fixedX: 600 },   
+    { name: "VINSAT-NANO-4", color: shuffledColors[3], speed: 6, fixedX: 800 },  
+    { name: "VINSAT-NANO-5", color: shuffledColors[4], speed: 7, fixedX: 1000 },  
+    { name: "VINSAT-NANO-6", color: shuffledColors[5], speed: 4, fixedX: 1200 },  
+    { name: "VINSAT-NANO-7", color: shuffledColors[6], speed: 3, fixedX: 1400 },  
+    { name: "VINSAT-NANO-8", color: shuffledColors[7], speed: 5, fixedX: 1600 },  // Đường bay cắt thẳng qua Trạm Đà Nẵng (X = 1600)
+    { name: "VINSAT-NANO-9", color: shuffledColors[8], speed: 2, fixedX: 1750 },  
+    { name: "VINSAT-NANO-10", color: shuffledColors[9], speed: 9, fixedX: 1900 }  
   ];
 
   // ======================
@@ -89,32 +90,32 @@ function runDashboard() {
       iconAnchor: L.point(5, 5)
     });
 
-    const initialX = i * 600 + 100; 
+    // Rải so le vị trí Y ban đầu (từ 300 đến 1000) để lúc mở web không bị xếp hàng ngang
+    const initialY = 1000 - (i * 70) % 700; 
     var initialPoint = new Array();
-    initialPoint.push(sat.heightY);
-    initialPoint.push(initialX);
+    initialPoint.push(initialY);
+    initialPoint.push(sat.fixedX);
 
     return {
       name: sat.name,
       color: sat.color,
       speed: sat.speed,
-      x: initialX,
-      y: sat.heightY, 
+      x: sat.fixedX,
+      y: initialY, 
       marker: L.marker(initialPoint, { icon: icon }).addTo(map)
     };
   });
 
   // ======================
-  // THUẬT TOÁN QUỸ ĐẠO BAY THẲNG TẮP KHÔNG ZIGZAC
+  // THUẬT TOÁN QUỸ ĐẠO BAY THẲNG TỪ TRÊN XUỐNG DƯỚI
   // ======================
   setInterval(function() {
     satObjects.forEach(function(sat) {
-      sat.x += sat.speed; // Chỉ thay đổi trục X để dịch chuyển sang phải
-      // Giữ nguyên trục Y (sat.y) để vệ tinh bay thành đường thẳng tuyệt đối
+      sat.y -= sat.speed; // Giảm trục Y để vệ tinh tịnh tiến bay từ trên đỉnh xuống đáy bản đồ
 
-      // Reset vòng lặp tuần hoàn khi bay hết mép bên phải của bản đồ
-      if (sat.x > 2000) {
-        sat.x = 0;
+      // Reset vòng lặp: Khi bay xuống quá mép dưới cùng (Y < 0), đưa vệ tinh trở lại đỉnh trên cùng (Y = 1000)
+      if (sat.y < 0) {
+        sat.y = 1000;
       }
 
       var nextPoint = new Array();
