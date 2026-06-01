@@ -14,6 +14,7 @@ function runDashboard() {
     zoomControl: false
   }).setView([20, 0], 2);
 
+  // ĐÃ SỬA: Đường dẫn tile layer chuẩn cho bản đồ tối dark-mode
   L.tileLayer('https://{s}://{z}/{x}/{y}{r}.png').addTo(map);
 
   // ======================
