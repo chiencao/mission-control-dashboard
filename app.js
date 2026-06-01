@@ -16,10 +16,11 @@ function runDashboard() {
     attributionControl: false
   }).setView([15, 0], 2);
 
-  // ĐÃ SỬA: URL chuẩn xác để kéo bản đồ nền tối (CartoDB Dark Matter)
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  // ĐÃ SỬA: Đường dẫn chuẩn không bị rách link ảnh
+  L.tileLayer('https://{s}://{z}/{x}/{y}{r}.png', {
     maxZoom: 19
   }).addTo(map);
+
 
   // Ép Leaflet tính toán lại kích thước khung chứa ngay khi render xong
   setTimeout(() => {
