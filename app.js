@@ -1,10 +1,18 @@
 // Chờ thư viện Leaflet (L) nạp xong
 const initWhenReady = setInterval(function() {
   if (typeof L !== 'undefined') {
+    clearInterval(initReadyMap()); 
+  }
+}, 50);
+
+function clearInterval(cb) {} // Hàm bổ trợ tránh trùng lặp hệ thống
+
+const initReadyMap = function() {
+  if (typeof L !== 'undefined') {
     clearInterval(initWhenReady);
     runDashboard(); 
   }
-}, 50);
+};
 
 function runDashboard() {
   // ======================
@@ -39,13 +47,13 @@ function runDashboard() {
   // SỬ DỤNG HÌNH ẢNH MAP.WEBP TỪ REPO CỦA BẠN
   // ======================
   L.imageOverlay('map.webp', nativeBounds).addTo(map);
-  map.setView(L.latLng(500, 1000), -0.5); 
+  map.setView(L.latLng(585, 1555), -0.5); // Tập trung góc nhìn ban đầu ngay gần Việt Nam
   
   // ======================
-  // TRẠM MẶT ĐẤT VINUNIVERSITY (HÀ NỘI) - Tọa độ mới vào sâu đất liền phía Bắc
+  // TRẠM MẶT ĐẤT VINUNIVERSITY (HÀ NỘI) - Căn chỉnh tọa độ vàng chuẩn xác
   // ======================
-  const targetY = 620; 
-  const targetX = 1580;
+  const targetY = 585; 
+  const targetX = 1555;
   var stationPoint = new Array();
   stationPoint.push(targetY); 
   stationPoint.push(targetX); 
@@ -60,111 +68,103 @@ function runDashboard() {
   L.marker(stationPoint, { icon: groundStationIcon }).addTo(map);
 
   // ======================
-  // SATELLITE DATA (ĐA HƯỚNG QUỸ ĐẠO HỘI TỤ TẠI VINUNI)
+  // SATELLITE DATA (MẠNG NHỆN ĐA HƯỚNG - RANDOM MÀU)
   // ======================
   const colorsList = ["#10b981", "#ef4444", "#06b6d4", "#f59e0b", "#a855f7", "#3b82f6", "#ec4899", "#14b8a6", "#f43f5e", "#0284c7"];
   const shuffledColors = colorsList.sort(function() { return 0.5 - Math.random(); });
 
-  // Định nghĩa độ dốc (Hệ số góc m) cho quỹ đạo đi qua trạm VinUni: (y - targetY) = m * (x - targetX)
-  // Với các vệ tinh dọc hẳn hoặc ngang hẳn, ta xử lý góc di chuyển riêng
+  // Định nghĩa góc bay (độ) cho mạng nhện đan xen xuyên tâm
   const satellites = [
-    { name: "VINSAT-NANO-1", color: shuffledColors, speed: 4, angle: 0 },    // Bay ngang chuẩn qua Hà Nội
-    { name: "VINSAT-NANO-2", color: shuffledColors, speed: 5, angle: 90 },   // Bay dọc đứng chuẩn qua Hà Nội
-    { name: "VINSAT-NANO-3", color: shuffledColors, speed: 3, angle: 15 },   // Xiên xiết nhẹ
-    { name: "VINSAT-NANO-4", color: shuffledColors, speed: 6, angle: -15 },  // Xiên hướng ngược lại
-    { name: "VINSAT-NANO-5", color: shuffledColors, speed: 4, angle: 30 },   // Xiên vừa chéo lên
-    { name: "VINSAT-NANO-6", color: shuffledColors, speed: 5, angle: -30 },  // Xiên vừa chéo xuống
-    { name: "VINSAT-NANO-7", color: shuffledColors, speed: 3, angle: 45 },   // Chéo góc 45 độ sắc nét
-    { name: "VINSAT-NANO-8", color: shuffledColors, speed: 5, angle: -45 },  // Chéo góc -45 độ sắc nét
-    { name: "VINSAT-NANO-9", color: shuffledColors, speed: 3, angle: 60 },   // Dốc đứng hơn
-    { name: "VINSAT-NANO-10", color: shuffledColors, speed: 6, angle: -60 }  // Dốc ngược xuống
+    { name: "VINSAT-1", angle: 0, speed: 5 },    // Bay ngang tuyệt đối
+    { name: "VINSAT-2", angle: 90, speed: 4 },   // Bay dọc tuyệt đối
+    { name: "VINSAT-3", angle: 30, speed: 5 },   // Chéo mạng nhện
+    { name: "VINSAT-4", angle: 60, speed: 6 },   // Chéo dốc đứng
+    { name: "VINSAT-5", angle: 120, speed: 4 },  // Chéo ngược xuôi
+    { name: "VINSAT-6", angle: 150, speed: 5 },  // Chéo là mặt đất
+    { name: "VINSAT-7", angle: -45, speed: 7 },  // Chéo góc vuông xuống
+    { name: "VINSAT-8", angle: -20, speed: 4 },  // Xiên nhẹ góc nam
+    { name: "VINSAT-9", angle: 105, speed: 6 },  // Cận dọc đứng
+    { name: "VINSAT-10", angle: 135, speed: 5 }  // Chéo góc vuông lên
   ];
 
   // ======================
-  // CREATE SATELLITES
+  // CREATE SATELLITES & TÍNH TOÁN BIÊN GIAO CẮT
   // ======================
   const satObjects = satellites.map(function(sat, i) {
+    const clr = shuffledColors[i % shuffledColors.length];
+    
+    // FIX: Sửa chuỗi HTML loại bỏ nối biến lỗi để hiển thị lại dấu chấm tròn vệ tinh sắc nét
     const icon = L.divIcon({
       className: 'satellite-custom-icon', 
-      html: '<div class="sat-dot" style="background:' + sat.color + '; box-shadow: 0 0 8px ' + sat.color + ', 0 0 16px ' + sat.color + '"></div><div class="sat-label" style="border-left: 2px solid ' + sat.color + '">' + sat.name + '</div>',
+      html: '<div class="sat-dot" style="background:' + clr + '; box-shadow: 0 0 10px ' + clr + '"></div><div class="sat-label" style="border-left: 2px solid ' + clr + '">' + sat.name + '</div>',
       iconSize: L.point(10, 10),
       iconAnchor: L.point(5, 5)
     });
 
-    // Rải đều tọa độ kinh độ X ban đầu trên bản đồ phẳng (từ 0 đến 2000)
-    let initialX = (i * 200) % 2000;
-    let initialY = targetY;
+    const rad = (sat.angle * Math.PI) / 180;
+    const cos = Math.cos(rad);
+    const sin = Math.sin(rad);
 
-    // Tính toán trục dọc Y dựa trên trục ngang X để đảm bảo chúng xuất hiện nằm ngay trên đường thẳng đi qua trạm
-    if (sat.angle !== 90) {
-      const rad = (sat.angle * Math.PI) / 180;
-      const slope = Math.tan(rad);
-      initialY = targetY + (initialX - targetX) * slope;
-      
-      // Nếu tọa độ Y khởi tạo vượt quá biên màn hình, ta đẩy lùi X để khớp khung hình 1000x2000
-      if (initialY < 0 || initialY > 1000) {
-         initialX = targetX;
-         initialY = targetY;
-      }
-    } else {
-      // Đối với vệ tinh bay dọc 90 độ, X cố định bằng Kinh độ trạm, Y rải đều từ 0 đến 1000
-      initialX = targetX;
-      initialY = (i * 100) % 1000;
+    // Tính khoảng cách t tối đa từ trạm đến 4 cạnh của khung ảnh 2000x1000
+    var tValues = new Array();
+    if (Math.abs(cos) > 0.001) {
+      tValues.push((2000 - targetX) / cos);
+      tValues.push((0 - targetX) / cos);
+    }
+    if (Math.abs(sin) > 0.001) {
+      tValues.push((1000 - targetY) / sin);
+      tValues.push((0 - targetY) / sin);
     }
 
+    // Lấy khoảng biên quỹ đạo lọt trong canvas hình chữ nhật
+    var tMax = 1500;
+    var tMin = -1500;
+    tValues.forEach(function(t) {
+      if (t > 0 && t < tMax) tMax = t;
+      if (t < 0 && t > tMin) tMin = t;
+    });
+
+    // Trải so le các vệ tinh ngẫu nhiên trên toàn bộ chiều dài quỹ đạo
+    const startOffset = tMin + (i * ((tMax - tMin) / satellites.length));
+
+    const currentX = targetX + startOffset * cos;
+    const currentY = targetY + startOffset * sin;
+
     var initialPoint = new Array();
-    initialPoint.push(initialY);
-    initialPoint.push(initialX);
+    initialPoint.push(currentY);
+    initialPoint.push(currentX);
 
     return {
       name: sat.name,
-      color: sat.color,
+      color: clr,
       speed: sat.speed,
-      angle: sat.angle,
-      x: initialX,
-      y: initialY,
+      cos: cos,
+      sin: sin,
+      tMax: tMax,
+      tMin: tMin,
+      offset: startOffset, // Quản lý vị trí di chuyển tịnh tiến
       marker: L.marker(initialPoint, { icon: icon }).addTo(map)
     };
   });
 
   // ======================
-  // THUẬT TOÁN CUỐN VÒNG QUỸ ĐẠO KHÔNG GIAN (PAC-MAN WRAPPING)
+  // THUẬT TOÁN QUỸ ĐẠO MẠNG NHỆN CUỐN VÒNG (PAC-MAN) CHUẨN XUYÊN TÂM
   // ======================
   setInterval(function() {
     satObjects.forEach(function(sat) {
-      const rad = (sat.angle * Math.PI) / 180;
+      sat.offset += sat.speed; // Tiến về phía trước dọc đường thẳng
 
-      if (sat.angle === 90) {
-        // Xử lý chuyển động cho vệ tinh dọc đứng: Tịnh tiến trục Y đi xuống
-        sat.y -= sat.speed;
-        // Chạm đáy bản đồ dưới (Y < 0) -> Nhảy vọt lên đỉnh bản đồ trên (Y = 1000) ngay lập tức
-        if (sat.y < 0) {
-          sat.y = 1000;
-        }
-      } else {
-        // Xử lý chuyển động cho vệ tinh ngang/chéo: Tịnh tiến liên tục trục X sang bên phải
-        sat.x += sat.speed;
-        
-        // Chạm biên phải bản đồ thế giới (X > 2000) -> Xuất hiện ngay lập tức bên rìa trái (X = 0)
-        if (sat.x > 2000) {
-          sat.x = 0;
-        }
-        
-        // Cập nhật trục Y trượt tịnh tiến theo đúng góc nghiêng quỹ đạo đi qua tâm trạm VinUni
-        const slope = Math.tan(rad);
-        sat.y = targetY + (sat.x - targetX) * slope;
-
-        // Nếu góc chéo quá dốc làm vệ tinh trượt lọt ra ngoài mép trên hoặc mép dưới của bản đồ phẳng Trái Đất
-        if (sat.y > 1000) {
-          sat.y = sat.y - 1000; // Cuốn vòng trục dọc lên trên
-        } else if (sat.y < 0) {
-          sat.y = sat.y + 1000; // Cuốn vòng trục dọc xuống dưới
-        }
+      // CƠ CHẾ CUỐN VÒNG NGAY LẬP TỨC: Khi vượt quá giới hạn biên (tMax), lập tức nhảy về biên đối diện (tMin)
+      if (sat.offset > sat.tMax) {
+        sat.offset = sat.tMin;
       }
 
+      const nextX = targetX + sat.offset * sat.cos;
+      const nextY = targetY + sat.offset * sat.sin;
+
       var nextPoint = new Array();
-      nextPoint.push(sat.y);
-      nextPoint.push(sat.x);
+      nextPoint.push(nextY);
+      nextPoint.push(nextX);
 
       sat.marker.setLatLng(nextPoint);
     });
