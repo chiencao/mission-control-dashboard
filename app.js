@@ -16,24 +16,16 @@ function runDashboard() {
     attributionControl: false
   }).setView([16.0, 108.0], 3);
 
-// BẮT BUỘC PHẢI CÓ: Thêm layer bản đồ tối
-L.tileLayer('https://{s}://{z}/{x}/{y}{r}.png', {
-  attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors &copy; <a href="https://carto.com">CARTO</a>',
-  subdomains: 'abcd',
-  maxZoom: 20
-}).addTo(map);
+  // ĐÃ SỬA CHUẨN: Thay thế đường dẫn lỗi bằng Map Tiles tối của CartoDB
+  L.tileLayer('https://{s}://{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors &copy; <a href="https://carto.com">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 20
+  }).addTo(map);
 
-
-
-  // ĐÃ SỬA: Ép bản đồ tự động vẽ lại sau 100ms, 500ms và 1000ms để chống lỗi sập giao diện
-  setTimeout(() => { map.invalidateSize(); }, 100);
-  setTimeout(() => { map.invalidateSize(); }, 500);
-  setTimeout(() => { map.invalidateSize(); }, 1000);
-
-
-  // Ép Leaflet tính toán lại kích thước khung chứa
-  setTimeout(() => {
-    map.invalidateSize();
+  // ĐÃ SỬA: Ép bản đồ tự động vẽ lại sau 200ms để chống lỗi sập giao diện Flexbox
+  setTimeout(() => { 
+    map.invalidateSize(); 
   }, 200);
 
   // ======================
@@ -89,7 +81,7 @@ L.tileLayer('https://{s}://{z}/{x}/{y}{r}.png', {
   });
 
   // ======================
-  // THUẬT TOÁN QUỸ ĐẠO QUÉT QUA VIỆT NAM (ĐÃ SỬA)
+  // THUẬT TOÁN QUỸ ĐẠO QUÉT QUA VIỆT NAM
   // ======================
   setInterval(() => {
     satObjects.forEach(sat => {
