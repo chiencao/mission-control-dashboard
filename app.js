@@ -18,7 +18,7 @@ function runDashboard() {
     maxZoom: 2
   });
 
-  // Định vị khung đồ họa chuẩn tỉ lệ ảnh 2000 x 1000
+  // Định vị khung đồ họa chuẩn tỉ lệ ảnh 1000 x 2000 trục [Y, X]
   const bounds = [[0, 0], [1000, 2000]]; 
 
   // ======================
@@ -28,7 +28,7 @@ function runDashboard() {
   map.fitBounds(bounds); // Tự động căn bản đồ vừa khít khung hiển thị
 
   // ======================
-  // TRẠM MẶT ĐẤT ĐÀ NẴNG (Tọa độ X=1600, Y=540 tương đối trên ảnh 2K)
+  // TRẠM MẶT ĐẤT ĐÀ NẴNG (Tọa độ trục [Y, X] tương đối trên ảnh)
   // ======================
   const danangCoords =; 
   
