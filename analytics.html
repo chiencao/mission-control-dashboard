@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>VinSpace SatOps - Telemetry Analytics</title>
+  <!-- FONT INTER & STYLE ĐỒNG BỘ -->
+  <link href="https://googleapis.com" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  
+  <style>
+    /* CSS RIÊNG CHO MÀN HÌNH ĐỒ THỊ VIỄN ĐO */
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+      padding: 20px;
+      height: 100%;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+    
+    .chart-container {
+      background: #111827;
+      border: 1px solid #1f2937;
+      border-radius: 8px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .chart-card {
+      background: #0d1117;
+      border: 1px solid #1f2937;
+      border-radius: 6px;
+      padding: 12px;
+      position: relative;
+      height: 160px; /* Độ cao vừa vặn cho sóng nhạc */
+    }
+
+    .panel-title {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: #9ca3af;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .live-value {
+      font-family: monospace;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    /* RIGHT SIDEBAR: HEALTH MATRIX */
+    .health-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .matrix-box {
+      background: #111827;
+      border: 1px solid #1f2937;
+      border-radius: 8px;
+      padding: 18px;
+    }
+
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 13px;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 6px;
+      background: #1f2937;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 75%;
+      transition: width 0.4s ease;
+    }
+
+    /* MENU ĐIỀU HƯỚNG */
+    .nav-tabs { display: flex; gap: 10px; }
+    .nav-link {
+      color: #9ca3af; text-decoration: none; font-size: 12px; font-weight: 600;
+      padding: 6px 12px; border-radius: 4px; border: 1px solid transparent;
+    }
+    .nav-link.active {
+      color: #3b82f6; background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3);
+    }
+    .nav-link:hover:not(.active) { color: #fff; background: #1f2937; }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">▲ VINSPACE MISSION CONTROL</div>
+  
+  <!-- THANH ĐIỀU HƯỚNG 3 MÀN HÌNH CHUẨN TRÊN GITHUB -->
+  <nav class="nav-tabs">
+    <a href="index.html" class="nav-link">📡 TRACKING MAP</a>
+    <a href="analytics.html" class="nav-link active">📊 TELEMETRY CHART</a>
+    <a href="commands.html" class="nav-link">⚙️ COMMAND & PASSES</a>
+  </nav>
+
+  <div class="status">🟢 TRẠM ĐÀ NẴNG GS-1: KẾT NỐI ỔN ĐỊNH</div>
+</header>
+
+<div class="container">
+  <!-- KHUNG PANEL TRÁI ĐỒNG BỘ -->
+  <div class="left-panel">
+    <div class="card">
+      <h3>TRẠNG THÁI HỆ THỐNG</h3>
+      <div class="circle">100%</div>
+      <div class="stats">
+        <div>Vệ tinh quỹ đạo: 03/03</div>
+        <div class="green">HOẠT ĐỘNG TỐT</div>
+        <div class="warning">Cảnh báo lỗi: 00</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>TRẠM MẶT ĐẤT (GS-1)</h3>
+      <div class="green">ĐANG PHÁT (DOWNLINK)</div>
+      <div style="margin: 5px 0; color: #9ca3af;">Tx 14.25 GHz | Power: 45W</div>
+      <div class="speed">--- Mbps</div>
+    </div>
+  </div>
+
+  <!-- PHẦN CHÍNH: ĐỒ THỊ SÓNG NHẠC NHẤP NHÔ TIÊN TIẾN -->
+  <div class="main-panel">
+    <div class="analytics-grid">
+      
+      <!-- BÊN TRÁI: 3 KHUNG ĐỒ THỊ CHO 3 VỆ TINH -->
+      <div class="chart-container">
+        
+        <!-- VỆ TINH 1 -->
+        <div>
+          <div class="panel-title">
+            <span>📡 VINSAT-NANO-1 (BĂNG THÔNG DOWNLINK)</span>
+            <span class="live-value" id="val-sat1" style="color: #10b981;">0 Mbps</span>
+          </div>
+          <div class="chart-card">
+            <canvas id="chart-sat1"></canvas>
+          </div>
+        </div>
+
+        <!-- VỆ TINH 2 -->
+        <div>
+          <div class="panel-title">
+            <span>📡 VINSAT-NANO-2 (TẦN SỐ SÓNG HIỆU CHỈNH)</span>
+            <span class="live-value" id="val-sat2" style="color: #ef4444;">0 MHz</span>
+          </div>
+          <div class="chart-card">
+            <canvas id="chart-sat2"></canvas>
+          </div>
+        </div>
+
+        <!-- VỆ TINH 3 -->
+        <div>
+          <div class="panel-title">
+            <span>📡 VINSAT-NANO-3 (CƯỜNG ĐỘ TÍN HIỆU ĐƯỜNG TRUYỀN)</span>
+            <span class="live-value" id="val-sat3" style="color: #06b6d4;">0 dBm</span>
+          </div>
+          <div class="chart-card">
+            <canvas id="chart-sat3"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- BÊN PHẢI: CHỈ SỐ SỨC KHỎE PHẦN CỨNG THỜI GIAN THỰC -->
+      <div class="health-sidebar">
+        <div class="matrix-box">
+          <h3 class="panel-title" style="margin-bottom: 15px;">🔋 NĂNG LƯỢNG PIN MẶT TRỜI</h3>
+          
+          <div class="metric-row">
+            <div>VINSAT-NANO-1</div>
+            <div id="p-val-1" style="color:#10b981">92%</div>
+          </div>
+          <div class="progress-bar-bg"><div id="p-bar-1" class="progress-bar-fill" style="background:#10b981; width:92%"></div></div>
+
+          <div class="metric-row" style="margin-top:15px">
+            <div>VINSAT-NANO-2</div>
+            <div id="p-val-2" style="color:#ef4444">78%</div>
+          </div>
+          <div class="progress-bar-bg"><div id="p-bar-2" class="progress-bar-fill" style="background:#ef4444; width:78%"></div></div>
+
+          <div class="metric-row" style="margin-top:15px">
+            <div>VINSAT-NANO-3</div>
+            <div id="p-val-3" style="color:#06b6d4">85%</div>
+          </div>
+          <div class="progress-bar-bg"><div id="p-bar-3" class="progress-bar-fill" style="background:#06b6d4; width:85%"></div></div>
+        </div>
+
+        <div class="matrix-box">
+          <h3 class="panel-title" style="margin-bottom: 15px;">🌡️ NHIỆT ĐỘ LÕI VI XỬ LÝ (CPU)</h3>
+          <div class="metric-row"><span>Hệ thống làm mát:</span><span style="color:#10b981">ỔN ĐỊNH</span></div>
+          <div class="metric-row"><span>Nhiệt độ trung bình:</span><span style="font-family:monospace">24.5 °C</span></div>
+          <div class="metric-row"><span>Bức xạ tối đa:</span><span style="font-family:monospace; color:#f59e0b">0.12 Rad/h</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- THƯ VIỆN ĐỒ THỊ CHART.JS SIÊU NHẸ QUA CDN -->
+<script src="https://jsdelivr.net"></script>
+
+<script>
+  // 1. Giả lập Telemetry tốc độ mạng ở Panel trái để đồng bộ hệ thống
+  setInterval(() => {
+    const speedEl = document.querySelector(".speed");
+    if (speedEl) speedEl.innerText = `${(Math.random() * (180 - 120) + 120).toFixed(2)} Mbps`;
+  }, 1500);
+
+  // 2. Hàm tạo khung đồ thị dạng sóng nhạc nhấp nhô thời gian thực
+  function createWaveChart(canvasId, lineColor, fillColor) {
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    
+    // Tạo mảng dữ liệu ảo ban đầu (20 điểm mốc)
+    const initialData = Array(25).fill(0).map(() => Math.floor(Math.random() * 40) + 30);
+    const labels = Array(25).fill('');
+
+    return new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: initialData,
+          borderColor: lineColor,
+          borderWidth: 2,
+          pointRadius: 0, // Ẩn các chấm tròn để giống sóng nhạc mượt mà
+          lineTension: 0.4, // Tạo độ cong uốn lượn hình sin
+          fill: true,
+          backgroundColor: fillColor
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { display: false }, // Ẩn trục X
+          y: {
+            display: false, // Ẩn trục Y để tối ưu không gian hiển thị tối giản
+            min: 0,
+            max: 120
+          }
+        },
+        animation: { duration: 300 } // Tốc độ trượt sóng mượt
+      }
+    });
+  }
+
+  // Khởi tạo 3 đồ thị sóng nhạc cho 3 vệ tinh với màu neon đặc trưng
+  const chart1 = createWaveChart('chart-sat1', '#10b981', 'rgba(16, 185, 129, 0.08)');
+  const chart2 = createWaveChart('chart-sat2', '#ef4444', 'rgba(239, 68, 68, 0.08)');
+  const chart3 = createWaveChart('chart-sat3', '#06b6d4', 'rgba(6, 182, 212, 0.08)');
+
+  // 3. Vòng lặp cập nhật liên tục dữ liệu nhảy sóng (Mỗi 400 mili-giây - cực kỳ nhanh nhấp nhô)
+  setInterval(() => {
+    // Thuật toán cập nhật đồ thị 1 (Băng thông)
+    const val1 = (Math.random() * (100 - 60) + 60).toFixed(1);
+    document.getElementById('val-sat1').innerText = `${val1} Mbps`;
+    updateChartData(chart1, val1);
+
+    // Thuật toán cập nhật đồ thị 2 (Tần số)
+    const val2 = (Math.random() * (45 - 20) + 20).toFixed(1);
+    document.getElementById('val-sat2').innerText = `+${val2} MHz`;
+    updateChartData(chart2, val2);
+
+    // Thuật toán cập nhật đồ thị 3 (Tín hiệu)
+    const val3 = Math.floor(Math.random() * (95 - 70) + 70);
+    document.getElementById('val-sat3').innerText = `-${val3} dBm`;
+    updateChartData(chart3, val3);
+
+    // Cập nhật ngẫu nhiên thanh năng lượng pin mặt trời bên phải
+    [1, 2, 3].forEach(id => {
+      let currentVal = parseInt(document.getElementById(`p-val-${id}`).innerText);
+      currentVal += Math.random() > 0.5 ? 1 : -1;
+      if (currentVal > 100) currentVal = 100;
+      if (currentVal < 40) currentVal = 40;
+      
+      document.getElementById(`p-val-${id}`).innerText = `${currentVal}%`;
+      document.getElementById(`p-bar-${id}`).style.width = `${currentVal}%`;
+    });
+
+  }, 400);
+
+  // Hàm đẩy dữ liệu mới vào cuối và xóa dữ liệu cũ đầu đồ thị (Hiệu ứng dịch sóng sang trái)
