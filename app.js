@@ -19,13 +19,12 @@ function runDashboard() {
   // ĐÃ SỬA CHUẨN: Thay thế đường dẫn lỗi bằng Map Tiles tối của CartoDB
  
    
- 
-
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+ L.tileLayer('https://{s}://{z}/{x}/{y}{scale}.png', {
     subdomains: 'abcd',
-    maxZoom: 20
+    maxZoom: 20,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com">CARTO</a>'
 }).addTo(map);
+
 
 
 
