@@ -4,56 +4,94 @@
 <meta charset="UTF-8">
 <title>Telemetry Dashboard</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<!-- FONT -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+<!-- CHART -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 body {
   margin: 0;
-  padding: 0;
-  background: #0b0f17;
   font-family: 'Inter', sans-serif;
+  background: #0b0f17;
   color: #cbd5f5;
+  overflow: hidden; /* 🔥 disable scroll */
 }
 
+/* HEADER */
+.header {
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  border-bottom: 1px solid #1f2937;
+}
+
+.logo {
+  font-weight: 800;
+  color: #38bdf8;
+}
+
+.nav-tabs {
+  display: flex;
+  gap: 10px;
+}
+
+.nav-link {
+  color: #9ca3af;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 4px;
+}
+
+.nav-link.active {
+  color: #3b82f6;
+  background: rgba(59,130,246,0.1);
+}
+
+.nav-link:hover {
+  background: #1f2937;
+}
+
+.status {
+  font-size: 12px;
+  color: #22c55e;
+}
+
+/* MAIN FULL SCREEN */
 .container {
-  width: 100%;
   height: calc(100vh - 70px);
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: 1fr 1fr; /* 🔥 2 chart chia đều */
+  gap: 12px;
+  padding: 12px;
+  box-sizing: border-box;
 }
 
-/* FULL WIDTH CONTENT */
-.content {
-  flex: 1;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-/* CARD FULL WIDTH */
+/* CARD */
 .card {
   background: #111827;
   border: 1px solid #1f2937;
   border-radius: 6px;
-  padding: 12px;
-  width: 100%;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* TITLE */
+.card h3 {
+  margin: 0 0 5px 0;
+  font-size: 13px;
+  color: #9ca3af;
 }
 
 /* CHART FULL */
 canvas {
-  width: 100% !important;
-  height: 320px !important;
-}
-
-
-/* LEGEND STYLE */
-.chart-title {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 10px;
-  font-weight: 600;
+  flex: 1;
 }
 
 </style>
@@ -61,22 +99,31 @@ canvas {
 
 <body>
 
+<!-- ✅ HEADER GIỮ NGUYÊN -->
+<header class="header">
+  <div class="logo">▲ VINSPACE MISSION CONTROL</div>
+  
+  <nav class="nav-tabs">
+    <a href="index.html" class="nav-link">📡 TRACKING MAP</a>
+    <a href="analytics.html" class="nav-link">📊 TELEMETRY CHART</a>
+    <a href="commands.html" class="nav-link active">⚙️ COMMAND & PASSES</a>
+  </nav>
+
+  <div class="status">🟢 TRẠM VINUNIVERSITY GS-1: KẾT NỐI ỔN ĐỊNH</div>
+</header>
+
+<!-- ✅ FULL SCREEN 2 CHART -->
 <div class="container">
 
- <div class="content">
-
-    <div class="card">
-      <h3>🔋 BATTERY VOLTAGE</h3>
-      <canvas id="batteryChart"></canvas>
-    </div>
-
-    <div class="card">
-      <h3>🌡 TEMPERATURE</h3>
-      <canvas id="tempChart"></canvas>
-    </div>
-
+  <div class="card">
+    <h3>🔋 BATTERY VOLTAGE</h3>
+    <canvas id="batteryChart"></canvas>
   </div>
 
+  <div class="card">
+    <h3>🌡 TEMPERATURE</h3>
+    <canvas id="tempChart"></canvas>
+  </div>
 
 </div>
 
@@ -98,22 +145,20 @@ function createDatasets() {
     data: [],
     borderWidth: 1.2,
     pointRadius: 0,
-    tension: 0   // QUAN TRỌNG: không smooth
+    tension: 0 // 🔥 giống grafana (no smooth)
   }));
 }
 
-// INIT
+// =======================
+// INIT CHART
+// =======================
 const batteryChart = new Chart(
   document.getElementById("batteryChart"),
   {
     type: "line",
-    data: {
-      labels: [],
-      datasets: createDatasets()
-    },
+    data: { labels: [], datasets: createDatasets() },
     options: {
       animation: false,
-      responsive: true,
       plugins: {
         legend: { labels: { color: "#cbd5f5" } }
       },
@@ -136,13 +181,9 @@ const tempChart = new Chart(
   document.getElementById("tempChart"),
   {
     type: "line",
-    data: {
-      labels: [],
-      datasets: createDatasets()
-    },
+    data: { labels: [], datasets: createDatasets() },
     options: {
       animation: false,
-      responsive: true,
       plugins: {
         legend: { labels: { color: "#cbd5f5" } }
       },
@@ -162,13 +203,13 @@ const tempChart = new Chart(
 );
 
 // =======================
-// DATA “GIỐNG THẬT”
+// REALISTIC NOISE DATA
 // =======================
 function noisy(min, max) {
   let val = Math.random() * (max - min) + min;
 
-  // thỉnh thoảng spike mạnh
-  if (Math.random() < 0.1) {
+  // 🔥 random spike giống ảnh
+  if (Math.random() < 0.15) {
     val = Math.random() * (max - min);
   }
 
@@ -183,7 +224,7 @@ function updateChart(chart, min, max) {
     ds.data.push(noisy(min, max));
   });
 
-  if (chart.data.labels.length > 80) {
+  if (chart.data.labels.length > 100) {
     chart.data.labels.shift();
     chart.data.datasets.forEach(ds => ds.data.shift());
   }
@@ -195,7 +236,7 @@ function updateChart(chart, min, max) {
 setInterval(() => {
   updateChart(batteryChart, 2.5, 5);
   updateChart(tempChart, 30, 80);
-}, 400);
+}, 300);
 
 </script>
 
