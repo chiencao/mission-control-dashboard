@@ -17,11 +17,12 @@ function runDashboard() {
   }).setView([16.0, 108.0], 3);
 
   // ĐÃ SỬA CHUẨN: Thay thế đường dẫn lỗi bằng Map Tiles tối của CartoDB
-  L.tileLayer('https://{s}://{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors &copy; <a href="https://carto.com">CARTO</a>',
-    subdomains: 'abcd',
-    maxZoom: 20
+ 
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors',
+    maxZoom: 19
   }).addTo(map);
+
 
   // ĐÃ SỬA: Ép bản đồ tự động vẽ lại sau 200ms để chống lỗi sập giao diện Flexbox
   setTimeout(() => { 
