@@ -17,7 +17,7 @@ function runDashboard() {
     zoomSnap: 0.1,  
     minZoom: -2,
     maxZoom: 3,
-    maxBoundsViscosity: 1.0     // Khóa chặt góc nhìn, không cho kéo lệch khỏi ảnh nền
+    maxBoundsViscosity: 1.0     
   });
 
   // Thiết lập ma trận ranh giới bản đồ (2000 x 1000)
@@ -33,7 +33,6 @@ function runDashboard() {
   nativeBounds.push(pointBottomLeft);
   nativeBounds.push(pointTopRight);
 
-  // Ép bản đồ giới hạn nghiêm ngặt trong khung ảnh này để tránh viền xám đen bên ngoài
   map.setMaxBounds(nativeBounds);
   
   // ======================
@@ -43,11 +42,13 @@ function runDashboard() {
   map.setView(L.latLng(500, 1000), -0.5); 
   
   // ======================
-  // TRẠM MẶT ĐẤT ĐÀ NẴNG
+  // TRẠM MẶT ĐẤT ĐÀ NẴNG (Tâm điểm bắt buộc cắt qua)
   // ======================
+  const targetY = 540; 
+  const targetX = 1600;
   var stationPoint = new Array();
-  stationPoint.push(540); // Tọa độ trục Y (Vĩ độ phẳng)
-  stationPoint.push(1600); // Tọa độ trục X (Kinh độ phẳng)
+  stationPoint.push(targetY); 
+  stationPoint.push(targetX); 
   
   const groundStationIcon = L.divIcon({
     className: 'gs-icon',
@@ -59,24 +60,23 @@ function runDashboard() {
   L.marker(stationPoint, { icon: groundStationIcon }).addTo(map);
 
   // ======================
-  // SATELLITE DATA (ĐÃ RANDOM MÀU & CONFIG BAY THẲNG TỪ TRÊN XUỐNG)
+  // SATELLITE DATA (ĐA HƯỚNG QUỸ ĐẠO: NGANG, DỌC, CHÉO MẠNG NHỆN)
   // ======================
   const colorsList = ["#10b981", "#ef4444", "#06b6d4", "#f59e0b", "#a855f7", "#3b82f6", "#ec4899", "#14b8a6", "#f43f5e", "#0284c7"];
-  
-  // Thuật toán trộn ngẫu nhiên bảng màu khi tải trang
   const shuffledColors = colorsList.sort(function() { return 0.5 - Math.random(); });
 
+  // Cấu hình góc bay (độ) riêng biệt cho từng vệ tinh để tạo hiệu ứng đan lưới mạng nhện
   const satellites = [
-    { name: "VINSAT-NANO-1", color: shuffledColors[0], speed: 4, fixedX: 200 },  
-    { name: "VINSAT-NANO-2", color: shuffledColors[1], speed: 6, fixedX: 400 },  
-    { name: "VINSAT-NANO-3", color: shuffledColors[2], speed: 3, fixedX: 600 },   
-    { name: "VINSAT-NANO-4", color: shuffledColors[3], speed: 6, fixedX: 800 },  
-    { name: "VINSAT-NANO-5", color: shuffledColors[4], speed: 7, fixedX: 1000 },  
-    { name: "VINSAT-NANO-6", color: shuffledColors[5], speed: 4, fixedX: 1200 },  
-    { name: "VINSAT-NANO-7", color: shuffledColors[6], speed: 3, fixedX: 1400 },  
-    { name: "VINSAT-NANO-8", color: shuffledColors[7], speed: 5, fixedX: 1600 },  // Đường bay cắt thẳng qua Trạm Đà Nẵng (X = 1600)
-    { name: "VINSAT-NANO-9", color: shuffledColors[8], speed: 2, fixedX: 1750 },  
-    { name: "VINSAT-NANO-10", color: shuffledColors[9], speed: 9, fixedX: 1900 }  
+    { name: "VINSAT-NANO-1", color: shuffledColors[0], speed: 4, angle: 0 },    // Bay ngang tuyệt đối (0 độ)
+    { name: "VINSAT-NANO-2", color: shuffledColors[1], speed: 5, angle: 90 },   // Bay dọc tuyệt đối (90 độ)
+    { name: "VINSAT-NANO-3", color: shuffledColors[2], speed: 3, angle: 30 },   // Bay chéo xiên nhẹ
+    { name: "VINSAT-NANO-4", color: shuffledColors[3], speed: 6, angle: 150 },  // Bay chéo hướng ngược lại
+    { name: "VINSAT-NANO-5", color: shuffledColors[4], speed: 4, angle: 45 },   // Bay chéo góc vuông cân
+    { name: "VINSAT-NANO-6", color: shuffledColors[5], speed: 5, angle: 125 },  // Bay chéo dốc đứng
+    { name: "VINSAT-NANO-7", color: shuffledColors[6], speed: 3, angle: 75 },   // Bay dọc lệch nhẹ
+    { name: "VINSAT-NANO-8", color: shuffledColors[7], speed: 6, angle: -45 },  // Bay chéo từ góc trái trên xuống phải dưới
+    { name: "VINSAT-NANO-9", color: shuffledColors[8], speed: 2, angle: 10 },   // Bay ngang lệch xiên nhẹ
+    { name: "VINSAT-NANO-10", color: shuffledColors[9], speed: 7, angle: 105 }  // Bay dọc lệch xiên đậm
   ];
 
   // ======================
@@ -90,37 +90,54 @@ function runDashboard() {
       iconAnchor: L.point(5, 5)
     });
 
-    // Rải so le vị trí Y ban đầu (từ 300 đến 1000) để lúc mở web không bị xếp hàng ngang
-    const initialY = 1000 - (i * 70) % 700; 
+    // Biến offset điều khiển khoảng cách tiến lùi trên quỹ đạo. 
+    // Rải so le giá trị ban đầu từ -800 đến 800 để các vệ tinh rải rác khắp nơi, không tụ lại ở Trạm cùng một lúc
+    const initialOffset = (i * 200) - 900; 
+
+    // Chuyển đổi góc độ sang Radian để tính toán lượng giác
+    const rad = (sat.angle * Math.PI) / 180;
+
+    // Tính toán vị trí xuất phát chạy xuyên qua Tâm Đà Nẵng
+    const currentX = targetX + initialOffset * Math.cos(rad);
+    const currentY = targetY + initialOffset * Math.sin(rad);
+
     var initialPoint = new Array();
-    initialPoint.push(initialY);
-    initialPoint.push(sat.fixedX);
+    initialPoint.push(currentY);
+    initialPoint.push(currentX);
 
     return {
       name: sat.name,
       color: sat.color,
       speed: sat.speed,
-      x: sat.fixedX,
-      y: initialY, 
+      angle: sat.angle,
+      offset: initialOffset, // Quản lý vị trí di chuyển dọc theo vector góc
       marker: L.marker(initialPoint, { icon: icon }).addTo(map)
     };
   });
 
   // ======================
-  // THUẬT TOÁN QUỸ ĐẠO BAY THẲNG TỪ TRÊN XUỐNG DƯỚI
+  // THUẬT TOÁN QUỸ ĐẠO MẠNG NHỆN CẮT QUA TRẠM ĐÀ NẴNG
   // ======================
   setInterval(function() {
     satObjects.forEach(function(sat) {
-      sat.y -= sat.speed; // Giảm trục Y để vệ tinh tịnh tiến bay từ trên đỉnh xuống đáy bản đồ
+      // Tăng chỉ số offset để vệ tinh bay tiến về phía trước theo hướng góc của nó
+      sat.offset += sat.speed; 
 
-      // Reset vòng lặp: Khi bay xuống quá mép dưới cùng (Y < 0), đưa vệ tinh trở lại đỉnh trên cùng (Y = 1000)
-      if (sat.y < 0) {
-        sat.y = 1000;
+      const rad = (sat.angle * Math.PI) / 180;
+      let nextX = targetX + sat.offset * Math.cos(rad);
+      let nextY = targetY + sat.offset * Math.sin(rad);
+
+      // Thuật toán kiểm tra ranh giới: Nếu bay ra khỏi phạm vi bản đồ 2000x1000 thì reset vòng lặp tuần hoàn
+      if (nextX < -200 || nextX > 2200 || nextY < -200 || nextY > 1200) {
+        // Đưa vệ tinh quay trở lại đầu bên kia của quỹ đạo xuyên trạm (bên ngoài màn hình đối diện)
+        sat.offset = -1200; 
+        nextX = targetX + sat.offset * Math.cos(rad);
+        nextY = targetY + sat.offset * Math.sin(rad);
       }
 
       var nextPoint = new Array();
-      nextPoint.push(sat.y);
-      nextPoint.push(sat.x);
+      nextPoint.push(nextY);
+      nextPoint.push(nextX);
 
       sat.marker.setLatLng(nextPoint);
     });
