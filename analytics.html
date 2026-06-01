@@ -240,7 +240,8 @@
     </div>
   </div>
 </div>
-<!-- ĐÃ SỬA CHUẨN: Đường link thư viện tệp Chart.js chính thức ổn định -->
+
+  <!-- ĐÃ SỬA CHUẨN: Đường link thư viện tệp Chart.js chính thức ổn định -->
 <script src="https://cloudflare.com"></script>
 
 <script>
@@ -250,16 +251,20 @@
     if (speedEl) speedEl.innerText = `${(Math.random() * (180 - 120) + 120).toFixed(2)} Mbps`;
   }, 1500);
 
-  // 2. ĐÃ SỬA: Hoàn thiện hàm khởi tạo đồ thị sóng nhạc không lỗi cắt cụt
+  // Biến toàn cục chứa các đối tượng biểu đồ sau khi khởi tạo
+  let chart1, chart2, chart3;
+  const maxDataPoints = 25;
+
+  // 2. Hàm khởi tạo đồ thị sóng nhạc
   function createWaveChart(canvasId, lineColor, fillColor) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return null;
     const ctx = canvas.getContext('2d');
     
-    // Tạo mảng dữ liệu mốc ban đầu (25 điểm)
-    const initialData = Array(25).fill(0).map(() => Math.floor(Math.random() * 40) + 30);
-    const labels = Array(25).fill('');
+    const initialData = Array(maxDataPoints).fill(0).map(() => Math.floor(Math.random() * 40) + 30);
+    const labels = Array(maxDataPoints).fill('');
 
+    // Gọi đối tượng Chart từ thư viện CDN
     return new Chart(ctx, {
       type: 'line',
       data: {
@@ -268,8 +273,8 @@
           data: initialData,
           borderColor: lineColor,
           borderWidth: 2,
-          pointRadius: 0, // Ẩn các nút chấm tròn
-          lineTension: 0.4, // Tạo độ cong mượt dạng sóng nhạc
+          pointRadius: 0, 
+          lineTension: 0.4, 
           fill: true,
           backgroundColor: fillColor
         }]
@@ -286,93 +291,104 @@
             max: 120
           }
         },
-        animation: { duration: 300 } // Tốc độ trượt lướt sóng mượt
+        animation: { duration: 300 } 
       }
     });
   }
 
-  // Khởi tạo 3 đồ thị sóng nhạc cho 3 vệ tinh
-  const chart1 = createWaveChart('chart-sat1', '#10b981', 'rgba(16, 185, 129, 0.08)');
-  const chart2 = createWaveChart('chart-sat2', '#ef4444', 'rgba(239, 68, 68, 0.08)');
-  const chart3 = createWaveChart('chart-sat3', '#06b6d4', 'rgba(6, 182, 212, 0.08)');
+  // ĐÃ SỬA: Chờ toàn bộ tài nguyên hệ thống và CDN nạp xong mới kích hoạt hàm vẽ
+  document.addEventListener("DOMContentLoaded", () => {
+    // Kiểm tra vòng lặp nếu CDN phản hồi chậm
+    const checkChartLoaded = setInterval(() => {
+      if (typeof Chart !== 'undefined') {
+        clearInterval(checkChartLoaded);
+        initializeAllCharts();
+      }
+    }, 50);
+  });
 
-  // 3. ĐÃ KHÔI PHỤC: Vòng lặp liên tục đẩy sóng nhạc chạy mượt từ phải sang trái (400ms)
-  setInterval(() => {
-    if (chart1) {
-      const val1 = (Math.random() * (100 - 60) + 60).toFixed(1);
-      document.getElementById('val-sat1').innerText = `${val1} Mbps`;
-      updateChartData(chart1, val1);
-    }
+  function initializeAllCharts() {
+    // Khởi tạo 3 đồ thị sóng nhạc cho 3 vệ tinh sau khi biến Chart đã định nghĩa
+    chart1 = createWaveChart('chart-sat1', '#10b981', 'rgba(16, 185, 129, 0.08)');
+    chart2 = createWaveChart('chart-sat2', '#ef4444', 'rgba(239, 68, 68, 0.08)');
+    chart3 = createWaveChart('chart-sat3', '#06b6d4', 'rgba(6, 182, 212, 0.08)');
 
-    if (chart2) {
-      const val2 = (Math.random() * (45 - 20) + 20).toFixed(1);
-      document.getElementById('val-sat2').innerText = `+${val2} MHz`;
-      updateChartData(chart2, val2);
-    }
+    // Kích hoạt luồng chạy cập nhật dữ liệu nhấp nhô tuần hoàn (400ms)
+    startTelemetryLoop();
+  }
 
-    if (chart3) {
-      const val3 = Math.floor(Math.random() * (95 - 70) + 70);
-      document.getElementById('val-sat3').innerText = `-${val3} dBm`;
-      updateChartData(chart3, val3);
-    }
-
-    // Luồng cập nhật ngẫu nhiên thanh Pin & Nhiệt độ CPU độc lập cho từng vệ tinh
-    ['1', '2', '3'].forEach(id => {
-      // Cập nhật Pin
-      const pValEl = document.getElementById(`p-val-${id}`);
-      const pBarEl = document.getElementById(`p-bar-${id}`);
-      
-      if (pValEl && pBarEl) {
-        let currentPin = parseInt(pValEl.innerText);
-        currentPin += Math.random() > 0.5 ? 1 : -1;
-        if (currentPin > 100) currentPin = 100;
-        if (currentPin < 40) currentPin = 40;
-        pValEl.innerText = `${currentPin}%`;
-        pBarEl.style.width = `${currentPin}%`;
+  function startTelemetryLoop() {
+    setInterval(() => {
+      if (chart1) {
+        const val1 = (Math.random() * (100 - 60) + 60).toFixed(1);
+        document.getElementById('val-sat1').innerText = `${val1} Mbps`;
+        updateChartData(chart1, val1);
       }
 
-      // Cập nhật nhiệt độ CPU đi kèm cảnh báo màu thông minh
-      const tValEl = document.getElementById(`t-val-${id}`);
-      const tBarEl = document.getElementById(`t-bar-${id}`);
-      
-      if (tValEl && tBarEl) {
-        let currentTemp = parseFloat(tValEl.innerText);
-        currentTemp += Math.random() > 0.5 ? 0.4 : -0.4;
-        if (currentTemp > 85) currentTemp = 85;
-        if (currentTemp < 30) currentTemp = 30;
-        tValEl.innerText = `${currentTemp.toFixed(1)} °C`;
-        tBarEl.style.width = `${Math.min(currentTemp, 100)}%`;
+      if (chart2) {
+        const val2 = (Math.random() * (45 - 20) + 20).toFixed(1);
+        document.getElementById('val-sat2').innerText = `+${val2} MHz`;
+        updateChartData(chart2, val2);
+      }
+
+      if (chart3) {
+        const val3 = Math.floor(Math.random() * (95 - 70) + 70);
+        document.getElementById('val-sat3').innerText = `-${val3} dBm`;
+        updateChartData(chart3, val3);
+      }
+
+      // Cập nhật ngẫu nhiên thanh Pin & Nhiệt độ CPU độc lập cho từng vệ tinh
+      ['1', '2', '3'].forEach(id => {
+        const pValEl = document.getElementById(`p-val-${id}`);
+        const pBarEl = document.getElementById(`p-bar-${id}`);
         
-        // Cơ chế tự đổi màu thanh đo tương ứng độ nguy hiểm nhiệt lượng
-        if (currentTemp > 65) {
-          tBarEl.style.background = '#ef4444'; // Đỏ quá nhiệt
-          tValEl.style.color = '#ef4444';
-        } else if (currentTemp > 45) {
-          tBarEl.style.background = '#f59e0b'; // Cam cảnh báo
-          tValEl.style.color = '#f59e0b';
-        } else {
-          tBarEl.style.background = '#3b82f6'; // Xanh an toàn
-          tValEl.style.color = '#e2e8f0';
+        if (pValEl && pBarEl) {
+          let currentPin = parseInt(pValEl.innerText);
+          currentPin += Math.random() > 0.5 ? 1 : -1;
+          if (currentPin > 100) currentPin = 100;
+          if (currentPin < 40) currentPin = 40;
+          pValEl.innerText = `${currentPin}%`;
+          pBarEl.style.width = `${currentPin}%`;
         }
-      }
-    });
 
-  }, 400);
+        const tValEl = document.getElementById(`t-val-${id}`);
+        const tBarEl = document.getElementById(`t-bar-${id}`);
+        
+        if (tValEl && tBarEl) {
+          let currentTemp = parseFloat(tValEl.innerText);
+          currentTemp += Math.random() > 0.5 ? 0.4 : -0.4;
+          if (currentTemp > 85) currentTemp = 85;
+          if (currentTemp < 30) currentTemp = 30;
+          tValEl.innerText = `${currentTemp.toFixed(1)} °C`;
+          tBarEl.style.width = `${Math.min(currentTemp, 100)}%`;
+          
+          if (currentTemp > 65) {
+            tBarEl.style.background = '#ef4444'; 
+            tValEl.style.color = '#ef4444';
+          } else if (currentTemp > 45) {
+            tBarEl.style.background = '#f59e0b'; 
+            tValEl.style.color = '#f59e0b';
+          } else {
+            tBarEl.style.background = '#3b82f6'; 
+            tValEl.style.color = '#e2e8f0';
+          }
+        }
+      });
+    }, 400);
+  }
 
   // Hàm trượt đẩy dữ liệu đồ thị sang trái chuẩn xác Chart.js
   function updateChartData(chart, newValue) {
     if (!chart || !chart.data || !chart.data.datasets || chart.data.datasets.length === 0) return;
     
-    // Ép kiểu dữ liệu về dạng số để Chart.js vẽ mượt mà
     const numericValue = parseFloat(newValue);
     
-    // Đẩy dữ liệu mới vào cuối mảng và cắt bỏ điểm đầu tiên để tạo hiệu ứng trượt sóng
     chart.data.datasets[0].data.push(numericValue);
     chart.data.datasets[0].data.shift();
     
-    // Lệnh ép Chart.js render lại khung hình ngay lập tức
-    chart.update('none'); // Dùng 'none' để tắt hiệu ứng chuyển động mặc định, giúp sóng nhạc mượt và nhanh hơn
+    chart.update('none'); 
   }
 </script>
+
 
 
